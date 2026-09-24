@@ -10,9 +10,12 @@ const app = express();
 const server = http.createServer(app);
 
 const PORT = process.env.PORT || 5000;
-const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
-app.use(cors({ origin: CLIENT_URL }));
+// Enable universal CORS for Express REST & preflight endpoints
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST']
+}));
 app.use(express.json());
 
 // Health check endpoint
@@ -20,7 +23,7 @@ app.get('/', (req, res) => {
   res.send({ status: 'Photobooth Signaling Server is running' });
 });
 
-// Socket.io initialization with CORS
+// Socket.io initialization with open production CORS
 const io = new Server(server, {
   cors: {
     origin: '*',

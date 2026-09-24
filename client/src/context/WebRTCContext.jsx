@@ -5,7 +5,7 @@ import { playCountdownBeep, playShutterSound } from '../utils/audioHelper';
 import { auth, db, CLOUDINARY_URL, CLOUDINARY_UPLOAD_PRESET } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
-const SIGNALING_SERVER_URL = import.meta.env.VITE_SIGNALING_SERVER_URL || 'http://localhost:5000';
+const SIGNALING_SERVER_URL = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_SIGNALING_SERVER_URL || 'http://localhost:5000';
 
 const ICE_SERVERS = [
   { urls: 'stun:stun.l.google.com:19302' },
@@ -471,6 +471,9 @@ export function WebRTCProvider({ children }) {
         setLocalStream(stream);
 
         const peer = new Peer(undefined, {
+          host: '0.peerjs.com',
+          port: 443,
+          secure: true,
           config: {
             iceServers: ICE_SERVERS,
             iceCandidatePoolSize: 10

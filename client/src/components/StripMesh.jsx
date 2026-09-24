@@ -1,23 +1,35 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, memo } from 'react';
 import * as THREE from 'three';
 import { useTexture, Float, PresentationControls } from '@react-three/drei';
+
+/**
+ * Automatically compress Cloudinary images to lightweight WebP at max 800px width
+ */
+export function optimizeCloudinaryUrl(url) {
+  if (!url || typeof url !== 'string') return url;
+  if (url.includes('cloudinary.com') && url.includes('/upload/') && !url.includes('/upload/q_auto')) {
+    return url.replace('/upload/', '/upload/q_auto,f_auto,w_800/');
+  }
+  return url;
+}
 
 /**
  * Photobooth Strip 3D Mesh
  * Renders the 2D captured strip onto a tactile, subtly curved photo-paper plane
  */
 function StripGeometry({ textureUrl }) {
-  const texture = useTexture(textureUrl);
+  const optimizedUrl = useMemo(() => optimizeCloudinaryUrl(textureUrl), [textureUrl]);
+  const texture = useTexture(optimizedUrl);
 
-  // Configure texture for maximum crispness
+  // Configure texture for optimal rendering performance & crispness
   texture.generateMipmaps = true;
   texture.minFilter = THREE.LinearMipmapLinearFilter;
   texture.magFilter = THREE.LinearFilter;
   texture.colorSpace = THREE.SRGBColorSpace;
 
-  // 1000 x 2900 ratio geometry with subtle physical paper curvature
+  // 1000 x 2900 ratio geometry with optimized vertex grid (16x32)
   const { geometry } = useMemo(() => {
-    const geom = new THREE.PlaneGeometry(1.5, 4.35, 32, 64);
+    const geom = new THREE.PlaneGeometry(1.5, 4.35, 16, 32);
     const pos = geom.attributes.position;
 
     // Apply gentle paper curling along the edges
@@ -58,7 +70,7 @@ function StripGeometry({ textureUrl }) {
   );
 }
 
-export default function StripMesh({ textureUrl }) {
+function StripMesh({ textureUrl }) {
   if (!textureUrl) return null;
 
   return (
@@ -84,3 +96,5 @@ export default function StripMesh({ textureUrl }) {
     </PresentationControls>
   );
 }
+
+export default memo(StripMesh);

@@ -499,9 +499,9 @@ export function WebRTCProvider({ children }) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            width: { ideal: 640, max: 1280 },
-            height: { ideal: 480, max: 720 },
-            frameRate: { ideal: 24, max: 30 },
+            width: { ideal: 480, max: 640 },
+            height: { ideal: 640, max: 480 },
+            frameRate: { ideal: 15, max: 24 },
             facingMode: 'user'
           },
           audio: true
@@ -520,7 +520,11 @@ export function WebRTCProvider({ children }) {
           port: 443,
           secure: true,
           config: {
-            iceServers: ICE_SERVERS,
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:stun1.l.google.com:19302' },
+              ...ICE_SERVERS
+            ],
             iceCandidatePoolSize: 10
           }
         });

@@ -198,6 +198,7 @@ function MainAppRoutes() {
 
       {/* Dynamic Animated Mesh Gradient Blobs (Meng To Style) */}
       <motion.div
+        style={{ willChange: 'transform' }}
         animate={{
           x: [0, 40, -30, 0],
           y: [0, -40, 30, 0],
@@ -207,6 +208,7 @@ function MainAppRoutes() {
         className="absolute top-10 left-10 w-[45vw] h-[45vw] min-w-[350px] min-h-[350px] bg-emerald-600/20 rounded-full blur-[130px] pointer-events-none z-0"
       />
       <motion.div
+        style={{ willChange: 'transform' }}
         animate={{
           x: [0, -50, 35, 0],
           y: [0, 45, -35, 0],
@@ -216,6 +218,7 @@ function MainAppRoutes() {
         className="absolute bottom-10 right-10 w-[50vw] h-[50vw] min-w-[380px] min-h-[380px] bg-teal-500/18 rounded-full blur-[150px] pointer-events-none z-0"
       />
       <motion.div
+        style={{ willChange: 'transform' }}
         animate={{
           x: [0, 35, -25, 0],
           y: [0, 30, -40, 0],
@@ -225,6 +228,7 @@ function MainAppRoutes() {
         className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[38vw] h-[38vw] min-w-[300px] min-h-[300px] bg-emerald-400/12 rounded-full blur-[120px] pointer-events-none z-0"
       />
       <motion.div
+        style={{ willChange: 'transform' }}
         animate={{
           x: [0, -30, 40, 0],
           y: [0, -25, 25, 0],

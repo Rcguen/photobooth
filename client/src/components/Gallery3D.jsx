@@ -178,46 +178,45 @@ export default function Gallery3D({ strips = [], onBackToBooth }) {
         ) : hasStrips ? (
           <>
             <Canvas
-              shadows
               dpr={[1, 1.5]}
               performance={{ min: 0.5 }}
               camera={{ position: [0, 0, 5.2], fov: 48 }}
               className="w-full h-full cursor-grab active:cursor-grabbing"
+              gl={{ powerPreference: 'high-performance', antialias: true }}
             >
               {/* Soft, warm photobooth ambient lighting */}
-              <ambientLight intensity={0.85} />
+              <ambientLight intensity={0.9} />
 
-              {/* Main spotlight highlighting the strip */}
+              {/* Main key spotlight */}
               <spotLight
-                position={[4, 7, 5]}
-                angle={0.45}
-                penumbra={0.8}
-                intensity={1.8}
-                castShadow
-                shadow-bias={-0.0001}
+                position={[4, 6, 5]}
+                angle={0.5}
+                penumbra={0.9}
+                intensity={1.6}
               />
 
               {/* Cool emerald & warm rim lights */}
-              <directionalLight position={[-4, -2, -3]} intensity={0.5} color="#10b981" />
-              <directionalLight position={[3, -3, 2]} intensity={0.3} color="#14b8a6" />
+              <directionalLight position={[-3, -2, -3]} intensity={0.45} color="#10b981" />
+              <directionalLight position={[3, -2, 2]} intensity={0.3} color="#14b8a6" />
 
-              {/* Floating ambient sparkles */}
+              {/* Floating ambient sparkles (Optimized count for mobile GPU) */}
               <Sparkles
-                count={45}
-                scale={7}
-                size={2.2}
-                speed={0.3}
+                count={22}
+                scale={6}
+                size={2.0}
+                speed={0.25}
                 color="#34d399"
-                opacity={0.4}
+                opacity={0.35}
               />
 
-              {/* Soft floor shadow */}
+              {/* Soft baked floor shadow */}
               <ContactShadows
                 position={[0, -2.4, 0]}
-                opacity={0.65}
-                scale={8}
-                blur={2.5}
-                far={4}
+                opacity={0.55}
+                scale={7}
+                blur={2.0}
+                far={3.5}
+                resolution={512}
               />
 
               {/* 3D Strip Mesh */}

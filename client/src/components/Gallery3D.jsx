@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { ContactShadows, Sparkles, Html } from '@react-three/drei';
 import StripMesh from './StripMesh';
-import { useWebRTC } from '../context/WebRTCContext';
+import { useWebRTC, SHARED_VAULT_ID } from '../context/WebRTCContext';
 import { db } from '../firebase';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import {
@@ -29,16 +29,15 @@ function Loader() {
 }
 
 export default function Gallery3D({ strips = [], onBackToBooth }) {
-  const { roomId, savedStrips } = useWebRTC();
+  const { savedStrips } = useWebRTC();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [cloudStrips, setCloudStrips] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Firestore Real-Time Data Hydration
+  // Firestore Real-Time Data Hydration from Vault
   useEffect(() => {
-    const targetRoomId = (roomId || 'rk-cinema').toLowerCase();
     const photosQuery = query(
-      collection(db, 'rooms', targetRoomId, 'photos'),
+      collection(db, 'vaults', SHARED_VAULT_ID, 'photos'),
       orderBy('createdAt', 'desc')
     );
 
@@ -56,7 +55,7 @@ export default function Gallery3D({ strips = [], onBackToBooth }) {
     );
 
     return () => unsubscribe();
-  }, [roomId]);
+  }, []);
 
   // Merge Cloudinary/Firestore persistent URLs with local session strips
   const allStrips = useMemo(() => {

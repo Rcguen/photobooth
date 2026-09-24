@@ -6,6 +6,7 @@ import { auth, db, CLOUDINARY_URL, CLOUDINARY_UPLOAD_PRESET } from '../firebase'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const SIGNALING_SERVER_URL = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_SIGNALING_SERVER_URL || 'http://localhost:5000';
+export const SHARED_VAULT_ID = import.meta.env.VITE_SHARED_VAULT_ID || 'rk-permanent-vault';
 
 const ICE_SERVERS = [
   { urls: 'stun:stun.l.google.com:19302' },
@@ -184,17 +185,19 @@ export function WebRTCProvider({ children }) {
 
       console.log('[Cloudinary] Successfully uploaded photobooth strip:', secureUrl);
 
-      // 3. Sync metadata and secure URL to Firestore
-      const targetRoomId = (roomId || 'rk-cinema').toLowerCase();
-      const photosRef = collection(db, 'rooms', targetRoomId, 'photos');
+      // 3. Sync metadata and secure URL to Firestore under vaults/{SHARED_VAULT_ID}/photos
+      const targetVaultId = SHARED_VAULT_ID;
+      const photosRef = collection(db, 'vaults', targetVaultId, 'photos');
 
       await addDoc(photosRef, {
         url: secureUrl,
         createdAt: serverTimestamp(),
         userId: auth.currentUser ? auth.currentUser.uid : 'anonymous',
         authorName: auth.currentUser?.displayName || localName || 'Guest',
+        authorPhoto: auth.currentUser?.photoURL || null,
         names: `${localName} & ${partnerName}`,
-        roomId: targetRoomId,
+        vaultId: targetVaultId,
+        roomId: targetVaultId,
         ...metadata
       });
 

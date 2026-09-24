@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Sparkles, ArrowRight, ShieldCheck, Heart, Wand2, LogOut, Lock, UserCheck } from 'lucide-react';
+import { Camera, Sparkles, ArrowRight, ShieldCheck, Heart, LogOut, Lock, UserCheck, ShieldAlert } from 'lucide-react';
 import { auth, googleProvider } from '../firebase';
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+import { SHARED_VAULT_ID } from '../context/WebRTCContext';
 
 function GoogleIcon() {
   return (
@@ -27,8 +28,12 @@ function GoogleIcon() {
   );
 }
 
+const ALLOWED_EMAILS = (import.meta.env.VITE_ALLOWED_EMAILS || '')
+  .split(',')
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
+
 export default function RoomJoin({ onJoin }) {
-  const [roomId, setRoomId] = useState('');
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -63,15 +68,15 @@ export default function RoomJoin({ onJoin }) {
     }
   };
 
-  const generateRoomId = () => {
-    const randomId = Math.random().toString(36).substring(2, 8).toUpperCase();
-    setRoomId(randomId);
-  };
+  const isAuthorized = ALLOWED_EMAILS.length === 0 || (user?.email && ALLOWED_EMAILS.includes(user.email.toLowerCase()));
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (roomId.trim() && user) {
-      onJoin(roomId.trim().toUpperCase(), user.displayName || 'Ritchi');
+  const handleEnterStudio = () => {
+    if (user && isAuthorized) {
+      onJoin({
+        roomId: SHARED_VAULT_ID,
+        localName: user.displayName || 'Ritchi',
+        userId: user.uid
+      });
     }
   };
 
@@ -187,48 +192,49 @@ export default function RoomJoin({ onJoin }) {
               </motion.button>
             </div>
 
-            {/* Room Code Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5 flex items-center justify-between">
-                  <span>Room Identifier</span>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    type="button"
-                    onClick={generateRoomId}
-                    className="text-[11px] text-emerald-400 hover:text-emerald-300 font-medium transition-colors flex items-center gap-1"
-                  >
-                    <Wand2 className="w-3 h-3" />
-                    <span>Auto Generate</span>
-                  </motion.button>
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={roomId}
-                    onChange={(e) => setRoomId(e.target.value.toUpperCase())}
-                    placeholder="e.g. RK-CINEMA"
-                    className="w-full px-4 py-3.5 bg-black/40 border border-white/10 border-t-white/15 rounded-2xl text-white font-mono text-center tracking-[0.25em] placeholder:tracking-normal placeholder:font-sans focus:outline-none focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/15 backdrop-blur-xl transition-all duration-200 shadow-inner uppercase text-sm"
-                    required
-                  />
+            {/* Access State: Authorized vs Unauthorized */}
+            {!isAuthorized ? (
+              <div className="space-y-4">
+                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-center">
+                  <ShieldAlert className="w-6 h-6 text-amber-400 mx-auto mb-2" />
+                  <h3 className="text-xs font-bold text-amber-300 mb-1">Private Couple Sanctuary</h3>
+                  <p className="text-[11px] text-zinc-400 leading-relaxed">
+                    This studio is reserved exclusively for authorized accounts. Please sign in with the designated couple email address to enter.
+                  </p>
                 </div>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleSignOut}
+                  className="w-full py-3 px-4 rounded-2xl bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-semibold border border-white/10 transition-colors"
+                >
+                  Switch Account
+                </motion.button>
               </div>
+            ) : (
+              <div className="space-y-4 pt-1">
+                <div className="p-4 rounded-2xl bg-emerald-500/[0.04] border border-emerald-500/20 text-center">
+                  <div className="flex items-center justify-center gap-1.5 text-emerald-400 text-xs font-semibold mb-1">
+                    <Heart className="w-3.5 h-3.5 fill-emerald-400" />
+                    <span>Synchronized Private Studio</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 leading-relaxed">
+                    Both devices connect to the persistent sanctuary automatically.
+                  </p>
+                </div>
 
-              {/* Action Button (Glowing Emerald Gradient) */}
-              <div className="pt-1">
+                {/* Primary Action Button (Enter Our Studio) */}
                 <motion.button
                   whileHover={{ scale: 1.02, y: -1 }}
                   whileTap={{ scale: 0.98 }}
-                  type="submit"
-                  disabled={!roomId.trim()}
-                  className="w-full py-4 px-6 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold rounded-2xl text-sm transition-all shadow-[0_12px_30px_rgba(16,185,129,0.4)] hover:shadow-[0_16px_36px_rgba(16,185,129,0.55)] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group border border-emerald-400/30"
+                  onClick={handleEnterStudio}
+                  className="w-full py-4 px-6 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold rounded-2xl text-sm transition-all shadow-[0_12px_30px_rgba(16,185,129,0.4)] hover:shadow-[0_16px_36px_rgba(16,185,129,0.55)] flex items-center justify-center gap-2 border border-emerald-400/30 cursor-pointer group"
                 >
-                  <span className="tracking-tight">Enter Secure Studio</span>
+                  <span className="tracking-tight">Enter Our Studio</span>
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </motion.button>
               </div>
-            </form>
+            )}
           </div>
         )}
 

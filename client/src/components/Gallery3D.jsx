@@ -30,7 +30,7 @@ function Loader() {
   );
 }
 
-export default function Gallery3D({ strips = [], onBackToBooth }) {
+export default function Gallery3D({ strips = [], onBackToBooth, isActive = true }) {
   const { vaultId, partnerName, localName, isConnected, savedStrips } = useWebRTC();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [cloudStrips, setCloudStrips] = useState([]);
@@ -103,7 +103,7 @@ export default function Gallery3D({ strips = [], onBackToBooth }) {
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-[140px] pointer-events-none" />
 
       {/* Top Navbar */}
-      <header className="relative z-20 flex flex-wrap items-center justify-between gap-4 p-4 md:px-8 border-b border-white/10 bg-zinc-950/60 backdrop-blur-2xl">
+      <header className="relative z-20 flex flex-wrap items-center justify-between gap-4 p-4 md:px-8 border-b border-white/10 bg-zinc-950/95 md:bg-zinc-950/60 md:backdrop-blur-2xl">
         <div className="flex items-center gap-3">
           <button
             onClick={onBackToBooth}
@@ -133,7 +133,7 @@ export default function Gallery3D({ strips = [], onBackToBooth }) {
           <div className="flex items-center gap-2">
             <button
               onClick={handleDownload}
-              className="px-4 py-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold rounded-xl text-xs transition-all shadow-[0_10px_25px_rgba(16,185,129,0.35)] border border-emerald-400/30 flex items-center gap-2 hover:scale-105 active:scale-95"
+              className="px-4 py-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold rounded-xl text-xs transition-all shadow-[0_10px_25px_rgba(16,185,129,0.35)] border border-emerald-400/30 flex items-center gap-2 hover:scale-105 active:scale-95 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Download Strip</span>
@@ -178,11 +178,15 @@ export default function Gallery3D({ strips = [], onBackToBooth }) {
         ) : hasStrips ? (
           <>
             <Canvas
+              frameloop={isActive ? 'always' : 'demand'}
               dpr={[1, 1.5]}
               performance={{ min: 0.5 }}
               camera={{ position: [0, 0, 5.2], fov: 48 }}
               className="w-full h-full cursor-grab active:cursor-grabbing"
-              gl={{ powerPreference: 'high-performance', antialias: true }}
+              gl={{
+                antialias: typeof window !== 'undefined' ? window.innerWidth > 768 : false,
+                powerPreference: 'high-performance'
+              }}
             >
               {/* Soft, warm photobooth ambient lighting */}
               <ambientLight intensity={0.9} />
@@ -269,7 +273,7 @@ export default function Gallery3D({ strips = [], onBackToBooth }) {
 
       {/* Bottom Hint Banner */}
       {hasStrips && (
-        <footer className="relative z-20 p-3 text-center text-xs text-zinc-400 bg-zinc-950/80 border-t border-white/10 backdrop-blur-2xl flex items-center justify-center gap-2">
+        <footer className="relative z-20 p-3 text-center text-xs text-zinc-400 bg-zinc-950/95 md:bg-zinc-950/80 border-t border-white/10 md:backdrop-blur-2xl flex items-center justify-center gap-2">
           <RotateCcw className="w-3.5 h-3.5 text-emerald-400 animate-spin" style={{ animationDuration: '6s' }} />
           <span>Click & drag the strip to rotate and inspect in 3D • Synced with Cloudinary & Firestore</span>
         </footer>

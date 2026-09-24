@@ -536,7 +536,7 @@ export default function VideoRoom({ onOpenGallery }) {
 
       {/* Floating Bottom Glassmorphism Dock */}
       <footer className="relative z-20 flex items-center justify-center pb-2 sm:pb-3">
-        <div className="flex items-center gap-3 sm:gap-4 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-zinc-950/65 border-t border-white/25 border-x border-white/10 border-b border-black/80 shadow-[0_25px_60px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.2)] shadow-emerald-500/10 backdrop-blur-3xl">
+        <div className="flex items-center gap-3 sm:gap-4 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-zinc-950/95 md:bg-zinc-950/65 border-t border-white/25 border-x border-white/10 border-b border-black/80 shadow-[0_25px_60px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.2)] shadow-emerald-500/10 md:backdrop-blur-3xl">
           
           {/* Left Controls: Mic, Cam, Crop Guide */}
           <div className="flex items-center gap-1.5">
@@ -626,7 +626,7 @@ export default function VideoRoom({ onOpenGallery }) {
             </motion.button>
           </div>
 
-          {/* Right Controls: Filters, Fullscreen & Leave */}
+          {/* Right Controls: Filters & Fullscreen */}
           <div className="flex items-center gap-1.5">
             <motion.button
               whileHover={{ scale: 1.08 }}
@@ -655,16 +655,6 @@ export default function VideoRoom({ onOpenGallery }) {
               }`}
             >
               {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.92 }}
-              onClick={leaveRoom}
-              title="Leave Room"
-              className="p-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-full transition-all shadow-[0_0_15px_rgba(239,68,68,0.25)]"
-            >
-              <PhoneOff className="w-4 h-4" />
             </motion.button>
           </div>
 

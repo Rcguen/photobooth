@@ -29,7 +29,7 @@ function NavigationHeader() {
       {/* Left Brand / Room Info Glass Pill */}
       <motion.div
         whileHover={{ scale: 1.02, y: -1 }}
-        className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-zinc-900/40 backdrop-blur-3xl border border-white/10 border-t-white/20 shadow-[0_15px_30px_rgba(0,0,0,0.5)] shadow-emerald-500/5 flex-shrink-0"
+        className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-zinc-950/95 md:bg-zinc-900/40 md:backdrop-blur-3xl border border-white/10 border-t-white/20 shadow-[0_15px_30px_rgba(0,0,0,0.5)] shadow-emerald-500/5 flex-shrink-0"
       >
         <motion.div
           whileHover={{ rotate: 12, scale: 1.12 }}
@@ -56,7 +56,7 @@ function NavigationHeader() {
       </motion.div>
 
       {/* Center Floating Glass Navigation Dock */}
-      <nav className="flex items-center gap-1 sm:gap-1.5 p-1 sm:p-1.5 rounded-full bg-zinc-900/40 backdrop-blur-3xl border border-white/10 border-t-white/20 shadow-[0_20px_40px_rgba(0,0,0,0.5)] shadow-emerald-500/5 overflow-x-auto flex-nowrap">
+      <nav className="flex items-center gap-1 sm:gap-1.5 p-1 sm:p-1.5 rounded-full bg-zinc-950/95 md:bg-zinc-900/40 md:backdrop-blur-3xl border border-white/10 border-t-white/20 shadow-[0_20px_40px_rgba(0,0,0,0.5)] shadow-emerald-500/5 overflow-x-auto flex-nowrap">
         <NavLink
           to="/room"
           className={({ isActive }) =>
@@ -137,7 +137,7 @@ function NavigationHeader() {
         whileHover={{ scale: 1.08, y: -1 }}
         whileTap={{ scale: 0.92 }}
         onClick={handleLeave}
-        className="p-2 sm:p-2.5 rounded-full bg-zinc-900/40 hover:bg-red-500/20 text-zinc-400 hover:text-red-400 border border-white/10 hover:border-red-500/30 backdrop-blur-3xl transition-all duration-200 shadow-[0_15px_30px_rgba(0,0,0,0.5)] flex-shrink-0"
+        className="p-2 sm:p-2.5 rounded-full bg-zinc-950/95 md:bg-zinc-900/40 hover:bg-red-500/20 text-zinc-400 hover:text-red-400 border border-white/10 hover:border-red-500/30 md:backdrop-blur-3xl transition-all duration-200 shadow-[0_15px_30px_rgba(0,0,0,0.5)] flex-shrink-0 cursor-pointer"
         title="Leave Room"
       >
         <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -149,6 +149,13 @@ function NavigationHeader() {
 function MainAppRoutes() {
   const { roomId, joinRoom, updateNames, savedStrips } = useWebRTC();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const activeTab = React.useMemo(() => {
+    if (location.pathname.startsWith('/movie')) return 'movie';
+    if (location.pathname.startsWith('/gallery')) return 'gallery';
+    return 'photobooth';
+  }, [location.pathname]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -241,55 +248,50 @@ function MainAppRoutes() {
       {/* Header */}
       {roomId && <NavigationHeader />}
 
-      {/* Main View Router Stage */}
+      {/* Main View Stage: Stacked DOM Persistence */}
       <div className="relative z-10 flex-1 flex flex-col overflow-hidden">
-        <Routes>
-          {/* Root path: If in room, redirect to /room, otherwise show RoomJoin */}
-          <Route
-            path="/"
-            element={
-              roomId ? <Navigate replace to="/room" /> : <RoomJoin onJoin={handleJoin} />
-            }
-          />
+        {!roomId ? (
+          <RoomJoin onJoin={handleJoin} />
+        ) : (
+          <div className="relative w-full h-full flex-1 overflow-hidden">
+            {/* Photobooth Tab */}
+            <div
+              className={`w-full h-full transition-opacity duration-200 ${
+                activeTab === 'photobooth'
+                  ? 'relative z-10 opacity-100'
+                  : 'absolute inset-0 z-0 opacity-0 pointer-events-none'
+              }`}
+            >
+              <VideoRoom onOpenGallery={() => navigate('/gallery')} />
+            </div>
 
-          {/* Protected Route: Photobooth */}
-          <Route
-            path="/room"
-            element={
-              roomId ? (
-                <VideoRoom onOpenGallery={() => navigate('/gallery')} />
-              ) : (
-                <Navigate replace to="/" />
-              )
-            }
-          />
+            {/* Cinema Room Tab */}
+            <div
+              className={`w-full h-full transition-opacity duration-200 ${
+                activeTab === 'movie'
+                  ? 'relative z-10 opacity-100'
+                  : 'absolute inset-0 z-0 opacity-0 pointer-events-none'
+              }`}
+            >
+              <MovieRoom />
+            </div>
 
-          {/* Protected Route: Cinema Room */}
-          <Route
-            path="/movie"
-            element={
-              roomId ? <MovieRoom /> : <Navigate replace to="/" />
-            }
-          />
-
-          {/* Protected Route: 3D Scrapbook */}
-          <Route
-            path="/gallery"
-            element={
-              roomId ? (
-                <Gallery3D strips={savedStrips} onBackToBooth={() => navigate('/room')} />
-              ) : (
-                <Navigate replace to="/" />
-              )
-            }
-          />
-
-          {/* Catch-all fallback */}
-          <Route
-            path="*"
-            element={<Navigate replace to={roomId ? "/room" : "/"} />}
-          />
-        </Routes>
+            {/* 3D Scrapbook Tab */}
+            <div
+              className={`w-full h-full transition-opacity duration-200 ${
+                activeTab === 'gallery'
+                  ? 'relative z-10 opacity-100'
+                  : 'absolute inset-0 z-0 opacity-0 pointer-events-none'
+              }`}
+            >
+              <Gallery3D
+                isActive={activeTab === 'gallery'}
+                strips={savedStrips}
+                onBackToBooth={() => navigate('/room')}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

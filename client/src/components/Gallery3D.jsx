@@ -145,6 +145,8 @@ export default function Gallery3D({ strips = [], onBackToBooth }) {
           <>
             <Canvas
               shadows
+              dpr={[1, 1.5]}
+              performance={{ min: 0.5 }}
               camera={{ position: [0, 0, 5.2], fov: 48 }}
               className="w-full h-full cursor-grab active:cursor-grabbing"
             >

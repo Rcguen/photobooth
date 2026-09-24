@@ -458,7 +458,12 @@ export function WebRTCProvider({ children }) {
     async function initConnection() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
+          video: {
+            width: { ideal: 640, max: 1280 },
+            height: { ideal: 480, max: 720 },
+            frameRate: { ideal: 24, max: 30 },
+            facingMode: 'user'
+          },
           audio: true
         });
 

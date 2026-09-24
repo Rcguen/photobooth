@@ -1,7 +1,10 @@
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { ContactShadows, Sparkles, Html } from '@react-three/drei';
 import StripMesh from './StripMesh';
+import { useWebRTC } from '../context/WebRTCContext';
+import { db } from '../firebase';
+import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import {
   ChevronLeft,
   ChevronRight,
@@ -10,7 +13,8 @@ import {
   Layers,
   Sparkles as SparklesIcon,
   RotateCcw,
-  Maximize2
+  RefreshCw,
+  Cloud
 } from 'lucide-react';
 
 function Loader() {
@@ -25,28 +29,62 @@ function Loader() {
 }
 
 export default function Gallery3D({ strips = [], onBackToBooth }) {
+  const { roomId, savedStrips } = useWebRTC();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [cloudStrips, setCloudStrips] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const hasStrips = strips && strips.length > 0;
-  const currentStripUrl = hasStrips ? strips[currentIndex] : null;
+  // Firestore Real-Time Data Hydration
+  useEffect(() => {
+    const targetRoomId = (roomId || 'rk-cinema').toLowerCase();
+    const photosQuery = query(
+      collection(db, 'rooms', targetRoomId, 'photos'),
+      orderBy('createdAt', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(
+      photosQuery,
+      (snapshot) => {
+        const fetchedUrls = snapshot.docs.map((doc) => doc.data().url).filter(Boolean);
+        setCloudStrips(fetchedUrls);
+        setLoading(false);
+      },
+      (err) => {
+        console.warn('[Firestore Gallery Sync Error]:', err);
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [roomId]);
+
+  // Merge Cloudinary/Firestore persistent URLs with local session strips
+  const allStrips = useMemo(() => {
+    const merged = [...cloudStrips, ...(strips || []), ...(savedStrips || [])];
+    return Array.from(new Set(merged));
+  }, [cloudStrips, strips, savedStrips]);
+
+  const hasStrips = allStrips.length > 0;
+  const currentStripUrl = hasStrips ? allStrips[currentIndex % allStrips.length] : null;
 
   const handleNext = () => {
     if (hasStrips) {
-      setCurrentIndex((prev) => (prev + 1) % strips.length);
+      setCurrentIndex((prev) => (prev + 1) % allStrips.length);
     }
   };
 
   const handlePrev = () => {
     if (hasStrips) {
-      setCurrentIndex((prev) => (prev - 1 + strips.length) % strips.length);
+      setCurrentIndex((prev) => (prev - 1 + allStrips.length) % allStrips.length);
     }
   };
 
   const handleDownload = () => {
     if (!currentStripUrl) return;
     const link = document.createElement('a');
-    link.download = `photobooth-scrapbook-strip-${currentIndex + 1}.png`;
+    link.download = `photobooth-scrapbook-strip-${(currentIndex % allStrips.length) + 1}.png`;
     link.href = currentStripUrl;
+    link.target = '_blank';
     link.click();
   };
 
@@ -76,7 +114,7 @@ export default function Gallery3D({ strips = [], onBackToBooth }) {
             </h1>
             {hasStrips && (
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[11px] font-semibold border border-emerald-400/30">
-                {currentIndex + 1} / {strips.length}
+                {(currentIndex % allStrips.length) + 1} / {allStrips.length}
               </span>
             )}
           </div>
@@ -98,7 +136,12 @@ export default function Gallery3D({ strips = [], onBackToBooth }) {
 
       {/* Main 3D Canvas Area */}
       <main className="relative flex-1 w-full h-full">
-        {hasStrips ? (
+        {loading ? (
+          <div className="w-full h-full flex flex-col items-center justify-center gap-3">
+            <div className="w-8 h-8 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+            <span className="text-xs text-zinc-400 font-mono">Syncing 3D scrapbook from cloud...</span>
+          </div>
+        ) : hasStrips ? (
           <>
             <Canvas
               shadows
@@ -148,7 +191,7 @@ export default function Gallery3D({ strips = [], onBackToBooth }) {
             </Canvas>
 
             {/* Left / Right Strip Switchers */}
-            {strips.length > 1 && (
+            {allStrips.length > 1 && (
               <>
                 <button
                   onClick={handlePrev}
@@ -176,7 +219,7 @@ export default function Gallery3D({ strips = [], onBackToBooth }) {
             </div>
             <h2 className="text-xl font-bold text-white mb-2">No Strips in Gallery Yet</h2>
             <p className="text-sm text-zinc-400 max-w-sm mb-6 leading-relaxed">
-              Take some photos in the live photobooth room with your partner to render them in full 3D!
+              Take some photos in the live photobooth room with your partner. They will be automatically saved to Cloudinary and rendered in 3D!
             </p>
             <button
               onClick={onBackToBooth}
@@ -193,7 +236,7 @@ export default function Gallery3D({ strips = [], onBackToBooth }) {
       {hasStrips && (
         <footer className="relative z-20 p-3 text-center text-xs text-zinc-400 bg-zinc-950/80 border-t border-white/10 backdrop-blur-2xl flex items-center justify-center gap-2">
           <RotateCcw className="w-3.5 h-3.5 text-emerald-400 animate-spin" style={{ animationDuration: '6s' }} />
-          <span>Click & drag the strip to rotate and inspect in 3D • Floating tactile photo paper</span>
+          <span>Click & drag the strip to rotate and inspect in 3D • Synced with Cloudinary & Firestore</span>
         </footer>
       )}
     </div>

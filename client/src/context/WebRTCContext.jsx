@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import { io } from 'socket.io-client';
 import Peer from 'peerjs';
 import { playCountdownBeep, playShutterSound } from '../utils/audioHelper';
+import { auth, db, CLOUDINARY_URL, CLOUDINARY_UPLOAD_PRESET } from '../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const SIGNALING_SERVER_URL = import.meta.env.VITE_SIGNALING_SERVER_URL || 'http://localhost:5000';
 
@@ -145,9 +147,63 @@ export function WebRTCProvider({ children }) {
     });
   }, [sendP2PMessage]);
 
-  const saveStrip = useCallback((stripDataUrl) => {
+  // Cloudinary Upload & Firestore Sync
+  const saveStrip = useCallback(async (stripDataUrl, metadata = {}) => {
+    // 1. Immediately update local state for responsive UI
     setSavedStrips((prev) => [stripDataUrl, ...prev]);
-  }, []);
+
+    // 2. Upload to Cloudinary via unsigned preset
+    try {
+      let blob;
+      if (stripDataUrl instanceof Blob) {
+        blob = stripDataUrl;
+      } else {
+        const res = await fetch(stripDataUrl);
+        blob = await res.blob();
+      }
+
+      const formData = new FormData();
+      formData.append('file', blob);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+      const cloudRes = await fetch(CLOUDINARY_URL, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!cloudRes.ok) {
+        throw new Error(`Cloudinary upload failed with status ${cloudRes.status}`);
+      }
+
+      const cloudData = await cloudRes.json();
+      const secureUrl = cloudData.secure_url;
+
+      if (!secureUrl) {
+        throw new Error('No secure_url returned from Cloudinary');
+      }
+
+      console.log('[Cloudinary] Successfully uploaded photobooth strip:', secureUrl);
+
+      // 3. Sync metadata and secure URL to Firestore
+      const targetRoomId = (roomId || 'rk-cinema').toLowerCase();
+      const photosRef = collection(db, 'rooms', targetRoomId, 'photos');
+
+      await addDoc(photosRef, {
+        url: secureUrl,
+        createdAt: serverTimestamp(),
+        userId: auth.currentUser ? auth.currentUser.uid : 'anonymous',
+        authorName: auth.currentUser?.displayName || localName || 'Guest',
+        names: `${localName} & ${partnerName}`,
+        roomId: targetRoomId,
+        ...metadata
+      });
+
+      console.log('[Firestore] Synced photo strip document to room collection:', targetRoomId);
+      return secureUrl;
+    } catch (err) {
+      console.error('[Cloudinary/Firestore Sync Error]:', err);
+    }
+  }, [roomId, localName, partnerName]);
 
   // Setup PeerJS DataConnection handlers
   const setupDataConnection = useCallback((conn) => {

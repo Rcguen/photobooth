@@ -12,6 +12,7 @@
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.18.0",
     "clsx": "^2.1.1",
+    "firebase": "^12.19.0",
     "framer-motion": "^11.18.2",
     "long-distance-photobooth": "file:..",
     "lucide-react": "^0.441.0",

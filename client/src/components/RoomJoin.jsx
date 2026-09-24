@@ -1,10 +1,67 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Camera, Sparkles, ArrowRight, User, ShieldCheck, Heart, Wand2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Camera, Sparkles, ArrowRight, ShieldCheck, Heart, Wand2, LogOut, Lock, UserCheck } from 'lucide-react';
+import { auth, googleProvider } from '../firebase';
+import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+
+function GoogleIcon() {
+  return (
+    <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
+      <path
+        fill="#4285F4"
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+      />
+    </svg>
+  );
+}
 
 export default function RoomJoin({ onJoin }) {
   const [roomId, setRoomId] = useState('');
-  const [name, setName] = useState('Ritchi');
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [authError, setAuthError] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleGoogleSignIn = async () => {
+    setIsSigningIn(true);
+    setAuthError(null);
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (err) {
+      console.error('Google Sign-in Error:', err);
+      setAuthError(err.message || 'Failed to sign in with Google');
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.error('Sign-out error:', err);
+    }
+  };
 
   const generateRoomId = () => {
     const randomId = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -13,31 +70,33 @@ export default function RoomJoin({ onJoin }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (roomId.trim()) {
-      onJoin(roomId.trim().toUpperCase(), name.trim() || 'Ritchi');
+    if (roomId.trim() && user) {
+      onJoin(roomId.trim().toUpperCase(), user.displayName || 'Ritchi');
     }
   };
 
   return (
     <div className="relative min-h-[calc(100vh-2rem)] w-full flex items-center justify-center p-4 text-zinc-100 select-none">
-      
       {/* Centered Glassmorphic Card (Design+Code Floating Card) */}
       <motion.div
         initial={{ opacity: 0, y: 25, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 w-full max-w-md bg-gradient-to-b from-zinc-900/70 via-zinc-900/50 to-zinc-950/80 backdrop-blur-3xl border border-white/10 border-t-white/25 rounded-3xl p-8 sm:p-10 shadow-[0_30px_70px_rgba(0,0,0,0.7)] shadow-emerald-500/5"
+        className="relative z-10 w-full max-w-md bg-gradient-to-b from-zinc-900/70 via-zinc-900/50 to-zinc-950/80 backdrop-blur-3xl border-t border-white/25 border-x border-white/10 border-b border-black/80 rounded-3xl p-7 sm:p-10 shadow-[0_30px_70px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.15)] shadow-emerald-500/10"
       >
+        {/* Top Light Catching Edge Highlight */}
+        <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+
         {/* Brand Icon & Header */}
-        <div className="flex flex-col items-center text-center mb-8">
+        <div className="flex flex-col items-center text-center mb-7">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.15, duration: 0.5, type: 'spring' }}
             whileHover={{ scale: 1.08, rotate: 3 }}
-            className="relative mb-5 cursor-pointer"
+            className="relative mb-4 cursor-pointer"
           >
-            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-emerald-500/20 via-teal-500/25 to-emerald-400/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-[0_0_35px_rgba(16,185,129,0.3)] backdrop-blur-xl">
+            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-3xl bg-gradient-to-tr from-emerald-500/20 via-teal-500/25 to-emerald-400/10 border border-emerald-400/30 flex items-center justify-center text-emerald-400 shadow-[0_0_35px_rgba(16,185,129,0.35)] backdrop-blur-xl">
               <Camera className="w-8 h-8 sm:w-9 sm:h-9 drop-shadow" />
             </div>
             <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
@@ -47,80 +106,136 @@ export default function RoomJoin({ onJoin }) {
           </motion.div>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-b from-white via-zinc-100 to-zinc-400 bg-clip-text text-transparent">
-            Long-Distance Photobooth
+            Long-Distance Studio
           </h1>
-          <p className="text-xs sm:text-sm text-zinc-400 mt-2 font-normal max-w-xs leading-relaxed">
-            A cozy, synchronized virtual studio crafted with love for two.
+          <p className="text-xs sm:text-sm text-zinc-400 mt-1.5 font-normal max-w-xs leading-relaxed">
+            Private synchronized studio & cinematic room for two.
           </p>
         </div>
 
-        {/* Room & Name Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          
-          {/* User Name Input */}
-          <div>
-            <label className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5 flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Your Name</span>
-            </label>
-            <div className="relative group">
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Ritchi"
-                className="w-full px-4 py-3.5 bg-black/40 border border-white/10 border-t-white/15 rounded-2xl text-white font-medium placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/15 backdrop-blur-xl transition-all duration-200 shadow-inner"
-                required
-              />
-            </div>
+        {/* Auth Section / Profile Card */}
+        {loading ? (
+          <div className="py-8 flex flex-col items-center justify-center gap-3">
+            <div className="w-7 h-7 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+            <span className="text-xs text-zinc-400 font-mono">Verifying secure session...</span>
           </div>
-
-          {/* Room Code Input */}
-          <div>
-            <label className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5 flex items-center justify-between">
-              <span>Room Code</span>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                type="button"
-                onClick={generateRoomId}
-                className="text-[11px] text-emerald-400 hover:text-emerald-300 font-medium transition-colors flex items-center gap-1"
-              >
-                <Wand2 className="w-3 h-3" />
-                <span>Auto Generate</span>
-              </motion.button>
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={roomId}
-                onChange={(e) => setRoomId(e.target.value.toUpperCase())}
-                placeholder="e.g. LOVE-2026"
-                className="w-full px-4 py-3.5 bg-black/40 border border-white/10 border-t-white/15 rounded-2xl text-white font-mono text-center tracking-[0.25em] placeholder:tracking-normal placeholder:font-sans focus:outline-none focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/15 backdrop-blur-xl transition-all duration-200 shadow-inner uppercase"
-                required
-              />
+        ) : !user ? (
+          /* Google Sign In Call to Action */
+          <div className="space-y-4">
+            <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 text-center">
+              <Lock className="w-5 h-5 text-emerald-400 mx-auto mb-2 opacity-80" />
+              <p className="text-xs text-zinc-300 font-medium leading-relaxed">
+                Sign in with Google to protect your photos, sync strips, and unlock the private cinema.
+              </p>
             </div>
-          </div>
 
-          {/* Action Button (Glowing Emerald Gradient) */}
-          <div className="pt-2">
+            {authError && (
+              <div className="p-3 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs text-center">
+                {authError}
+              </div>
+            )}
+
             <motion.button
               whileHover={{ scale: 1.02, y: -1 }}
               whileTap={{ scale: 0.98 }}
-              type="submit"
-              disabled={!roomId.trim()}
-              className="w-full py-4 px-6 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold rounded-2xl text-sm transition-all shadow-[0_12px_30px_rgba(16,185,129,0.4)] hover:shadow-[0_16px_36px_rgba(16,185,129,0.55)] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group border border-emerald-400/30"
+              onClick={handleGoogleSignIn}
+              disabled={isSigningIn}
+              className="relative w-full py-3.5 px-6 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800/90 text-white font-semibold text-sm border-t border-white/25 border-x border-white/10 border-b border-black/70 shadow-[0_12px_30px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.15)] flex items-center justify-center gap-3 transition-all cursor-pointer group"
             >
-              <span className="tracking-tight">Enter Private Photobooth</span>
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              <GoogleIcon />
+              <span>{isSigningIn ? 'Signing in...' : 'Sign in with Google'}</span>
             </motion.button>
           </div>
-        </form>
+        ) : (
+          /* Authenticated State: Profile Card & Room Form */
+          <div className="space-y-5">
+            {/* Glass Profile Card */}
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white/[0.03] border-t border-white/20 border-x border-white/5 border-b border-black/50 shadow-inner">
+              <div className="flex items-center gap-3 min-w-0">
+                {user.photoURL ? (
+                  <img
+                    src={user.photoURL}
+                    alt={user.displayName || 'User'}
+                    className="w-10 h-10 rounded-full border border-emerald-400/40 shadow-md object-cover flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500 flex items-center justify-center text-white font-bold text-sm shadow-md flex-shrink-0">
+                    {(user.displayName || 'U')[0].toUpperCase()}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-white truncate block">
+                      {user.displayName || 'Authenticated User'}
+                    </span>
+                    <UserCheck className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                  </div>
+                  <span className="text-[11px] text-zinc-400 truncate block font-mono">
+                    {user.email}
+                  </span>
+                </div>
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleSignOut}
+                className="p-2 rounded-xl text-zinc-400 hover:text-red-400 hover:bg-white/5 transition-colors flex-shrink-0"
+                title="Switch Account / Sign Out"
+              >
+                <LogOut className="w-4 h-4" />
+              </motion.button>
+            </div>
+
+            {/* Room Code Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5 flex items-center justify-between">
+                  <span>Room Identifier</span>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="button"
+                    onClick={generateRoomId}
+                    className="text-[11px] text-emerald-400 hover:text-emerald-300 font-medium transition-colors flex items-center gap-1"
+                  >
+                    <Wand2 className="w-3 h-3" />
+                    <span>Auto Generate</span>
+                  </motion.button>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={roomId}
+                    onChange={(e) => setRoomId(e.target.value.toUpperCase())}
+                    placeholder="e.g. RK-CINEMA"
+                    className="w-full px-4 py-3.5 bg-black/40 border border-white/10 border-t-white/15 rounded-2xl text-white font-mono text-center tracking-[0.25em] placeholder:tracking-normal placeholder:font-sans focus:outline-none focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/15 backdrop-blur-xl transition-all duration-200 shadow-inner uppercase text-sm"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Action Button (Glowing Emerald Gradient) */}
+              <div className="pt-1">
+                <motion.button
+                  whileHover={{ scale: 1.02, y: -1 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="submit"
+                  disabled={!roomId.trim()}
+                  className="w-full py-4 px-6 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold rounded-2xl text-sm transition-all shadow-[0_12px_30px_rgba(16,185,129,0.4)] hover:shadow-[0_16px_36px_rgba(16,185,129,0.55)] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group border border-emerald-400/30"
+                >
+                  <span className="tracking-tight">Enter Secure Studio</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </motion.button>
+              </div>
+            </form>
+          </div>
+        )}
 
         {/* Footer info badge */}
-        <div className="mt-8 pt-5 border-t border-white/[0.06] flex items-center justify-center gap-2 text-[11px] text-zinc-400">
+        <div className="mt-7 pt-4 border-t border-white/[0.06] flex items-center justify-center gap-2 text-[11px] text-zinc-400">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Encrypted Peer-to-Peer Media Channels</span>
+          <span>Firebase Authenticated • Cloudinary Storage</span>
         </div>
       </motion.div>
     </div>

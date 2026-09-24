@@ -39,7 +39,7 @@ io.on('connection', (socket) => {
   console.log(`[Socket Connected] ID: ${socket.id}`);
 
   // User joins a photobooth room
-  socket.on('join-room', ({ roomId, peerId }) => {
+  socket.on('join-room', ({ roomId, peerId, uid, name, photo }) => {
     if (!roomId || !peerId) {
       console.warn(`[Join-Room Failed] Missing roomId or peerId from socket ${socket.id}`);
       return;
@@ -49,10 +49,10 @@ io.on('connection', (socket) => {
     socketToRoom.set(socket.id, roomId);
 
     socket.join(roomId);
-    console.log(`[User Joined] Peer: ${peerId} joined Room: ${roomId} (Socket: ${socket.id})`);
+    console.log(`[User Joined] Peer: ${peerId}, UID: ${uid || 'N/A'} joined Room: ${roomId} (Socket: ${socket.id})`);
 
     // Notify other peers in the room that a new user connected
-    socket.to(roomId).emit('user-connected', { peerId });
+    socket.to(roomId).emit('user-connected', { peerId, uid, name, photo });
   });
 
   // Synchronized 4-shot photobooth sequence trigger

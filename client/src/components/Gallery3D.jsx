@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { ContactShadows, Sparkles, Html } from '@react-three/drei';
 import StripMesh from './StripMesh';
-import { useWebRTC, SHARED_VAULT_ID } from '../context/WebRTCContext';
+import { useWebRTC } from '../context/WebRTCContext';
 import { db } from '../firebase';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import {
@@ -14,7 +14,9 @@ import {
   Sparkles as SparklesIcon,
   RotateCcw,
   RefreshCw,
-  Cloud
+  Cloud,
+  Lock,
+  Heart
 } from 'lucide-react';
 
 function Loader() {
@@ -29,15 +31,22 @@ function Loader() {
 }
 
 export default function Gallery3D({ strips = [], onBackToBooth }) {
-  const { savedStrips } = useWebRTC();
+  const { vaultId, partnerName, localName, isConnected, savedStrips } = useWebRTC();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [cloudStrips, setCloudStrips] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Firestore Real-Time Data Hydration from Vault
+  // Firestore Real-Time Data Hydration from Dynamic Relationship Vault
   useEffect(() => {
+    if (!vaultId) {
+      setCloudStrips([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
     const photosQuery = query(
-      collection(db, 'vaults', SHARED_VAULT_ID, 'photos'),
+      collection(db, 'vaults', vaultId, 'photos'),
       orderBy('createdAt', 'desc')
     );
 
@@ -55,7 +64,7 @@ export default function Gallery3D({ strips = [], onBackToBooth }) {
     );
 
     return () => unsubscribe();
-  }, []);
+  }, [vaultId]);
 
   // Merge Cloudinary/Firestore persistent URLs with local session strips
   const allStrips = useMemo(() => {
@@ -135,7 +144,33 @@ export default function Gallery3D({ strips = [], onBackToBooth }) {
 
       {/* Main 3D Canvas Area */}
       <main className="relative flex-1 w-full h-full">
-        {loading ? (
+        {!vaultId ? (
+          /* Waiting for Partner State */
+          <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center">
+            <div className="relative mb-5">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-tr from-emerald-500/20 via-teal-500/15 to-emerald-400/10 border border-emerald-400/30 flex items-center justify-center text-emerald-400 shadow-[0_0_40px_rgba(16,185,129,0.3)] backdrop-blur-2xl">
+                <Lock className="w-8 h-8 sm:w-9 sm:h-9" />
+              </div>
+              <span className="absolute -bottom-1 -right-1 flex h-4 w-4">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-4 w-4 bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.9)]"></span>
+              </span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-extrabold text-white mb-2 tracking-tight">
+              Waiting for partner to unlock shared memories...
+            </h2>
+            <p className="text-xs sm:text-sm text-zinc-400 max-w-md mb-6 leading-relaxed">
+              This 3D scrapbook is encrypted and uniquely tied to your couple relationship vault. Once {partnerName || 'your partner'} connects to the room, your shared memories will instantly decrypt and assemble in 3D.
+            </p>
+            <button
+              onClick={onBackToBooth}
+              className="px-6 py-3 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold rounded-2xl text-sm transition-all shadow-[0_12px_30px_rgba(16,185,129,0.35)] border border-emerald-400/30 flex items-center gap-2 hover:scale-105 active:scale-95 cursor-pointer"
+            >
+              <Camera className="w-4 h-4" />
+              <span>Return to Photobooth</span>
+            </button>
+          </div>
+        ) : loading ? (
           <div className="w-full h-full flex flex-col items-center justify-center gap-3">
             <div className="w-8 h-8 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
             <span className="text-xs text-zinc-400 font-mono">Syncing 3D scrapbook from cloud...</span>

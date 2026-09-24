@@ -70,10 +70,18 @@ export default function RoomJoin({ onJoin }) {
 
   const isAuthorized = ALLOWED_EMAILS.length === 0 || (user?.email && ALLOWED_EMAILS.includes(user.email.toLowerCase()));
 
-  const handleEnterStudio = () => {
-    if (user && isAuthorized) {
+  const [roomId, setRoomId] = useState('RK-CINEMA');
+
+  const generateRoomId = () => {
+    const randomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+    setRoomId(randomId);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (user && isAuthorized && roomId.trim()) {
       onJoin({
-        roomId: SHARED_VAULT_ID,
+        roomId: roomId.trim().toUpperCase(),
         localName: user.displayName || 'Ritchi',
         userId: user.uid
       });
@@ -212,28 +220,50 @@ export default function RoomJoin({ onJoin }) {
                 </motion.button>
               </div>
             ) : (
-              <div className="space-y-4 pt-1">
-                <div className="p-4 rounded-2xl bg-emerald-500/[0.04] border border-emerald-500/20 text-center">
-                  <div className="flex items-center justify-center gap-1.5 text-emerald-400 text-xs font-semibold mb-1">
-                    <Heart className="w-3.5 h-3.5 fill-emerald-400" />
-                    <span>Synchronized Private Studio</span>
+              <form onSubmit={handleSubmit} className="space-y-4 pt-1">
+                <div>
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5 flex items-center justify-between">
+                    <span>Call Room Code</span>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      type="button"
+                      onClick={generateRoomId}
+                      className="text-[11px] text-emerald-400 hover:text-emerald-300 font-medium transition-colors flex items-center gap-1 cursor-pointer"
+                    >
+                      <Sparkles className="w-3 h-3" />
+                      <span>Auto Generate</span>
+                    </motion.button>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={roomId}
+                      onChange={(e) => setRoomId(e.target.value.toUpperCase())}
+                      placeholder="e.g. RK-CINEMA"
+                      className="w-full px-4 py-3.5 bg-black/40 border border-white/10 border-t-white/15 rounded-2xl text-white font-mono text-center tracking-[0.25em] placeholder:tracking-normal placeholder:font-sans focus:outline-none focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/15 backdrop-blur-xl transition-all duration-200 shadow-inner uppercase text-sm"
+                      required
+                    />
                   </div>
-                  <p className="text-[11px] text-zinc-400 leading-relaxed">
-                    Both devices connect to the persistent sanctuary automatically.
+                  <p className="text-[10px] text-zinc-500 mt-1.5 text-center">
+                    Share this ephemeral call code with your partner to connect.
                   </p>
                 </div>
 
-                {/* Primary Action Button (Enter Our Studio) */}
-                <motion.button
-                  whileHover={{ scale: 1.02, y: -1 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleEnterStudio}
-                  className="w-full py-4 px-6 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold rounded-2xl text-sm transition-all shadow-[0_12px_30px_rgba(16,185,129,0.4)] hover:shadow-[0_16px_36px_rgba(16,185,129,0.55)] flex items-center justify-center gap-2 border border-emerald-400/30 cursor-pointer group"
-                >
-                  <span className="tracking-tight">Enter Our Studio</span>
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </motion.button>
-              </div>
+                {/* Primary Action Button */}
+                <div className="pt-1">
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -1 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="submit"
+                    disabled={!roomId.trim()}
+                    className="w-full py-4 px-6 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold rounded-2xl text-sm transition-all shadow-[0_12px_30px_rgba(16,185,129,0.4)] hover:shadow-[0_16px_36px_rgba(16,185,129,0.55)] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group border border-emerald-400/30 cursor-pointer"
+                  >
+                    <span className="tracking-tight">Enter Live Studio</span>
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  </motion.button>
+                </div>
+              </form>
             )}
           </div>
         )}

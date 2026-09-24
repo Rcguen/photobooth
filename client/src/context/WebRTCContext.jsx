@@ -47,6 +47,11 @@ export function WebRTCProvider({ children }) {
   const [localName, setLocalName] = useState('Ritchi');
   const [partnerName, setPartnerName] = useState('Kristine');
 
+  // Relationship Vault & UID Exchange State
+  const [partnerUid, setPartnerUid] = useState('');
+  const [partnerPhoto, setPartnerPhoto] = useState('');
+  const [vaultId, setVaultId] = useState('');
+
   // Interactive Synchronized Stickers State
   const [stickers, setStickers] = useState([]);
 
@@ -70,6 +75,8 @@ export function WebRTCProvider({ children }) {
   const localScreenStreamRef = useRef(null);
   const localNameRef = useRef(localName);
   const remotePeerIdRef = useRef('');
+  const partnerUidRef = useRef('');
+  const vaultIdRef = useRef('');
 
   const timerRef = useRef(null);
   const onShotCallbackRef = useRef(null);
@@ -185,19 +192,24 @@ export function WebRTCProvider({ children }) {
 
       console.log('[Cloudinary] Successfully uploaded photobooth strip:', secureUrl);
 
-      // 3. Sync metadata and secure URL to Firestore under vaults/{SHARED_VAULT_ID}/photos
-      const targetVaultId = SHARED_VAULT_ID;
-      const photosRef = collection(db, 'vaults', targetVaultId, 'photos');
+      // 3. Sync metadata and secure URL to Firestore under relationship vault: vaults/{vaultId}/photos
+      const myUid = auth.currentUser?.uid || 'anonymous';
+      const effectiveVaultId =
+        vaultId ||
+        vaultIdRef.current ||
+        (partnerUidRef.current ? [myUid, partnerUidRef.current].sort().join('_') : (myUid !== 'anonymous' ? `vault_${myUid}` : 'rk-permanent-vault'));
+
+      const photosRef = collection(db, 'vaults', effectiveVaultId, 'photos');
 
       await addDoc(photosRef, {
         url: secureUrl,
         createdAt: serverTimestamp(),
-        userId: auth.currentUser ? auth.currentUser.uid : 'anonymous',
+        userId: myUid,
         authorName: auth.currentUser?.displayName || localName || 'Guest',
         authorPhoto: auth.currentUser?.photoURL || null,
         names: `${localName} & ${partnerName}`,
-        vaultId: targetVaultId,
-        roomId: targetVaultId,
+        vaultId: effectiveVaultId,
+        roomId: roomId || 'ephemeral-session',
         ...metadata
       });
 
@@ -213,16 +225,41 @@ export function WebRTCProvider({ children }) {
     dataConnRef.current = conn;
 
     conn.on('open', () => {
+      const myUid = auth.currentUser?.uid || '';
       conn.send({
-        type: 'NAME_SYNC',
-        senderName: localNameRef.current
+        type: 'HANDSHAKE',
+        senderName: localNameRef.current,
+        uid: myUid,
+        photoURL: auth.currentUser?.photoURL || null
       });
     });
 
     conn.on('data', (data) => {
       if (!data) return;
 
-      if (data.type === 'NAME_SYNC' && data.senderName) {
+      if (data.type === 'HANDSHAKE' || data.type === 'HANDSHAKE_ACK') {
+        if (data.senderName) setPartnerName(data.senderName);
+        if (data.photoURL) setPartnerPhoto(data.photoURL);
+        if (data.uid) {
+          setPartnerUid(data.uid);
+          partnerUidRef.current = data.uid;
+          const myUid = auth.currentUser?.uid || '';
+          if (myUid) {
+            const calculatedVaultId = [myUid, data.uid].sort().join('_');
+            setVaultId(calculatedVaultId);
+            vaultIdRef.current = calculatedVaultId;
+            console.log('[Relationship Vault Established via PeerJS]:', calculatedVaultId);
+          }
+        }
+        if (data.type === 'HANDSHAKE' && conn.open) {
+          conn.send({
+            type: 'HANDSHAKE_ACK',
+            senderName: localNameRef.current,
+            uid: auth.currentUser?.uid || '',
+            photoURL: auth.currentUser?.photoURL || null
+          });
+        }
+      } else if (data.type === 'NAME_SYNC' && data.senderName) {
         setPartnerName(data.senderName);
       } else if (data.type === 'STICKER_ADDED' && data.sticker) {
         setStickers((prev) => {
@@ -503,16 +540,36 @@ export function WebRTCProvider({ children }) {
           setSocket(socket);
 
           socket.on('connect', () => {
-            socket.emit('join-room', { roomId, peerId: id });
+            socket.emit('join-room', {
+              roomId,
+              peerId: id,
+              uid: auth.currentUser?.uid || '',
+              name: localNameRef.current,
+              photo: auth.currentUser?.photoURL || null
+            });
           });
 
           socket.on('multi-shot-started', ({ totalShots: shots, initialDuration, intervalDuration }) => {
             runMultiShotSequence({ totalShots: shots, initialDuration, intervalDuration });
           });
 
-          socket.on('user-connected', ({ peerId: remoteId }) => {
+          socket.on('user-connected', ({ peerId: remoteId, uid: remoteUid, name: remoteName, photo: remotePhoto }) => {
             remotePeerIdRef.current = remoteId;
             setRemotePeerId(remoteId);
+
+            if (remoteName) setPartnerName(remoteName);
+            if (remotePhoto) setPartnerPhoto(remotePhoto);
+            if (remoteUid) {
+              setPartnerUid(remoteUid);
+              partnerUidRef.current = remoteUid;
+              const myUid = auth.currentUser?.uid || '';
+              if (myUid) {
+                const calculatedVaultId = [myUid, remoteUid].sort().join('_');
+                setVaultId(calculatedVaultId);
+                vaultIdRef.current = calculatedVaultId;
+                console.log('[Relationship Vault Established via Socket.io]:', calculatedVaultId);
+              }
+            }
 
             // Call remote peer with local webcam stream
             const call = peer.call(remoteId, stream);
@@ -547,6 +604,11 @@ export function WebRTCProvider({ children }) {
             if (dataConnRef.current) dataConnRef.current.close();
             remotePeerIdRef.current = '';
             setRemotePeerId('');
+            setPartnerUid('');
+            setPartnerPhoto('');
+            setVaultId('');
+            partnerUidRef.current = '';
+            vaultIdRef.current = '';
             setRemoteStream(null);
             setRemoteScreenStream(null);
             setIsConnected(false);
@@ -660,6 +722,9 @@ export function WebRTCProvider({ children }) {
     error,
     localName,
     partnerName,
+    partnerUid,
+    partnerPhoto,
+    vaultId,
     updateNames,
     stickers,
     addSticker,
@@ -699,6 +764,9 @@ export function WebRTCProvider({ children }) {
     error,
     localName,
     partnerName,
+    partnerUid,
+    partnerPhoto,
+    vaultId,
     updateNames,
     stickers,
     addSticker,

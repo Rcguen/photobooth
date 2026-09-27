@@ -1,12 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { 
-  getAuth, 
-  initializeAuth, 
-  indexedDBLocalPersistence, 
-  browserLocalPersistence, 
-  browserSessionPersistence, 
-  GoogleAuthProvider 
-} from 'firebase/auth';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -22,17 +15,8 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase Auth with multi-layer persistence (IndexedDB + LocalStorage + Session) for mobile compatibility
-let auth;
-try {
-  auth = initializeAuth(app, {
-    persistence: [indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence]
-  });
-} catch (e) {
-  auth = getAuth(app);
-}
-
-export { auth };
+// Initialize Firebase Auth & Firestore
+export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
   prompt: 'select_account'

@@ -77,6 +77,8 @@ export default function RoomJoin({ onJoin }) {
         }
       } else if (err.code === 'auth/popup-closed-by-user') {
         // User closed the popup, no error needed
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setAuthError(`Domain "${window.location.hostname}" is not authorized in Firebase. Please add "${window.location.hostname}" to Firebase Console -> Authentication -> Settings -> Authorized domains.`);
       } else {
         setAuthError(err.message || 'Failed to sign in with Google');
       }

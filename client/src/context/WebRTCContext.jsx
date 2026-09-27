@@ -17,6 +17,22 @@ const ICE_SERVERS = [
   { urls: 'stun:stun.cloudflare.com:3478' },
   { urls: 'stun:stun.services.mozilla.com' },
   { urls: 'stun:global.stun.twilio.com:3478' },
+  // OpenRelay TURN servers for Symmetric NAT / 4G/5G Mobile Cellular Traversal
+  {
+    urls: 'turn:openrelay.metered.ca:80',
+    username: 'openrelay',
+    credential: 'openrelay'
+  },
+  {
+    urls: 'turn:openrelay.metered.ca:443',
+    username: 'openrelay',
+    credential: 'openrelay'
+  },
+  {
+    urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+    username: 'openrelay',
+    credential: 'openrelay'
+  },
   ...(import.meta.env.VITE_TURN_SERVER_URL ? [{
     urls: import.meta.env.VITE_TURN_SERVER_URL,
     username: import.meta.env.VITE_TURN_USERNAME || '',
@@ -538,7 +554,7 @@ export function WebRTCProvider({ children }) {
         });
 
         const connectToRemotePeer = (remoteId, remoteUid, remoteName, remotePhoto) => {
-          if (!remoteId || remoteId === id) return;
+          if (!remoteId || remoteId === peer.id) return;
           console.log(`[WebRTC] Connecting to remote peer: ${remoteId} (UID: ${remoteUid || 'N/A'})`);
 
           remotePeerIdRef.current = remoteId;

@@ -12,12 +12,10 @@ const ICE_SERVERS = [
   { urls: 'stun:stun.l.google.com:19302' },
   { urls: 'stun:stun1.l.google.com:19302' },
   { urls: 'stun:stun2.l.google.com:19302' },
-  { urls: 'stun:stun3.l.google.com:19302' },
-  { urls: 'stun:stun4.l.google.com:19302' },
   { urls: 'stun:stun.cloudflare.com:3478' },
   { urls: 'stun:stun.services.mozilla.com' },
   { urls: 'stun:global.stun.twilio.com:3478' },
-  // OpenRelay TURN servers for Symmetric NAT / 4G/5G Mobile Cellular Traversal
+  // OpenRelay Standard TURN (UDP) for International NAT Traversal
   {
     urls: 'turn:openrelay.metered.ca:80',
     username: 'openrelay',
@@ -28,8 +26,15 @@ const ICE_SERVERS = [
     username: 'openrelay',
     credential: 'openrelay'
   },
+  // OpenRelay TCP TURN (bypasses ISP UDP carrier firewalls)
   {
     urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+    username: 'openrelay',
+    credential: 'openrelay'
+  },
+  // Secure TLS TURNS (bypasses cross-border deep-packet inspection)
+  {
+    urls: 'turns:openrelay.metered.ca:443?transport=tcp',
     username: 'openrelay',
     credential: 'openrelay'
   },
@@ -539,12 +544,9 @@ export function WebRTCProvider({ children }) {
           port: 443,
           secure: true,
           config: {
-            iceServers: [
-              { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:stun1.l.google.com:19302' },
-              ...ICE_SERVERS
-            ],
-            iceCandidatePoolSize: 10
+            iceServers: ICE_SERVERS,
+            iceCandidatePoolSize: 10,
+            sdpSemantics: 'unified-plan'
           }
         });
         peerRef.current = peer;

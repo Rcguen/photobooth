@@ -31,9 +31,10 @@ const io = new Server(server, {
   }
 });
 
-// Track sockets to peer IDs and room IDs
+// Track sockets to peer IDs, room IDs, and per-room participants
 const socketToPeer = new Map();
 const socketToRoom = new Map();
+const roomParticipants = new Map(); // roomId -> Map(socketId -> { peerId, uid, name, photo, socketId })
 
 io.on('connection', (socket) => {
   console.log(`[Socket Connected] ID: ${socket.id}`);
@@ -45,61 +46,86 @@ io.on('connection', (socket) => {
       return;
     }
 
+    const normalizedRoom = roomId.trim().toUpperCase();
+
     socketToPeer.set(socket.id, peerId);
-    socketToRoom.set(socket.id, roomId);
+    socketToRoom.set(socket.id, normalizedRoom);
 
-    socket.join(roomId);
-    console.log(`[User Joined] Peer: ${peerId}, UID: ${uid || 'N/A'} joined Room: ${roomId} (Socket: ${socket.id})`);
+    if (!roomParticipants.has(normalizedRoom)) {
+      roomParticipants.set(normalizedRoom, new Map());
+    }
+    const currentRoom = roomParticipants.get(normalizedRoom);
 
-    // Notify other peers in the room that a new user connected
-    socket.to(roomId).emit('user-connected', { peerId, uid, name, photo });
+    // Get list of existing users in this room (excluding self)
+    const existingUsers = Array.from(currentRoom.values()).filter((u) => u.socketId !== socket.id);
+
+    // Add current user to room
+    const userData = { peerId, uid, name, photo, socketId: socket.id };
+    currentRoom.set(socket.id, userData);
+
+    socket.join(normalizedRoom);
+    console.log(`[User Joined] Peer: ${peerId}, UID: ${uid || 'N/A'}, Name: ${name || 'N/A'} joined Room: ${normalizedRoom} (Existing peers: ${existingUsers.length})`);
+
+    // 1. Send existing users in the room to the newly joined client
+    socket.emit('room-users', { users: existingUsers });
+
+    // 2. Notify other peers in the room that a new user connected
+    socket.to(normalizedRoom).emit('user-connected', userData);
   });
 
   // Synchronized 4-shot photobooth sequence trigger
   socket.on('start-multi-shot', ({ roomId, totalShots = 4, initialDuration = 3, intervalDuration = 2 }) => {
     if (!roomId) return;
-    console.log(`[Multi-Shot Sequence Started] Room: ${roomId}, Total Shots: ${totalShots}`);
-    io.in(roomId).emit('multi-shot-started', { totalShots, initialDuration, intervalDuration });
+    const normalizedRoom = roomId.trim().toUpperCase();
+    console.log(`[Multi-Shot Sequence Started] Room: ${normalizedRoom}, Total Shots: ${totalShots}`);
+    io.in(normalizedRoom).emit('multi-shot-started', { totalShots, initialDuration, intervalDuration });
   });
 
   // URL Sync Mode Events (Weak Network Fallback)
   socket.on('sync-video-url', ({ roomId, url }) => {
     if (!roomId) return;
-    console.log(`[URL Sync] Room: ${roomId}, New URL: ${url}`);
-    socket.to(roomId).emit('video-url-synced', { url });
-    socket.to(roomId).emit('sync-url-received', { url });
+    const normalizedRoom = roomId.trim().toUpperCase();
+    console.log(`[URL Sync] Room: ${normalizedRoom}, New URL: ${url}`);
+    socket.to(normalizedRoom).emit('video-url-synced', { url });
+    socket.to(normalizedRoom).emit('sync-url-received', { url });
   });
 
   socket.on('sync-url', ({ roomId, url }) => {
     if (!roomId) return;
-    console.log(`[URL Sync] Room: ${roomId}, New URL: ${url}`);
-    socket.to(roomId).emit('video-url-synced', { url });
-    socket.to(roomId).emit('sync-url-received', { url });
+    const normalizedRoom = roomId.trim().toUpperCase();
+    console.log(`[URL Sync] Room: ${normalizedRoom}, New URL: ${url}`);
+    socket.to(normalizedRoom).emit('video-url-synced', { url });
+    socket.to(normalizedRoom).emit('sync-url-received', { url });
   });
 
   socket.on('sync-play', ({ roomId, currentTime }) => {
     if (!roomId) return;
-    socket.to(roomId).emit('video-play-synced', { currentTime });
+    const normalizedRoom = roomId.trim().toUpperCase();
+    socket.to(normalizedRoom).emit('video-play-synced', { currentTime });
   });
 
   socket.on('sync-pause', ({ roomId, currentTime }) => {
     if (!roomId) return;
-    socket.to(roomId).emit('video-pause-synced', { currentTime });
+    const normalizedRoom = roomId.trim().toUpperCase();
+    socket.to(normalizedRoom).emit('video-pause-synced', { currentTime });
   });
 
   socket.on('sync-seek', ({ roomId, currentTime }) => {
     if (!roomId) return;
-    socket.to(roomId).emit('video-seek-synced', { currentTime });
+    const normalizedRoom = roomId.trim().toUpperCase();
+    socket.to(normalizedRoom).emit('video-seek-synced', { currentTime });
   });
 
   socket.on('sync-buffering', ({ roomId }) => {
     if (!roomId) return;
-    socket.to(roomId).emit('video-buffering-synced', { from: socket.id });
+    const normalizedRoom = roomId.trim().toUpperCase();
+    socket.to(normalizedRoom).emit('video-buffering-synced', { from: socket.id });
   });
 
   socket.on('sync-canplay', ({ roomId }) => {
     if (!roomId) return;
-    socket.to(roomId).emit('video-canplay-synced', { from: socket.id });
+    const normalizedRoom = roomId.trim().toUpperCase();
+    socket.to(normalizedRoom).emit('video-canplay-synced', { from: socket.id });
   });
 
   // Handle peer disconnection
@@ -107,9 +133,18 @@ io.on('connection', (socket) => {
     const peerId = socketToPeer.get(socket.id);
     const roomId = socketToRoom.get(socket.id);
 
-    if (roomId && peerId) {
-      console.log(`[User Left] Peer: ${peerId} disconnected from Room: ${roomId}`);
-      socket.to(roomId).emit('user-disconnected', { peerId });
+    if (roomId) {
+      const currentRoom = roomParticipants.get(roomId);
+      if (currentRoom) {
+        currentRoom.delete(socket.id);
+        if (currentRoom.size === 0) {
+          roomParticipants.delete(roomId);
+        }
+      }
+      if (peerId) {
+        console.log(`[User Left] Peer: ${peerId} disconnected from Room: ${roomId}`);
+        socket.to(roomId).emit('user-disconnected', { peerId });
+      }
     }
 
     socketToPeer.delete(socket.id);

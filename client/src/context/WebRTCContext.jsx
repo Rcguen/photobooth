@@ -14,6 +14,9 @@ const ICE_SERVERS = [
   { urls: 'stun:stun2.l.google.com:19302' },
   { urls: 'stun:stun3.l.google.com:19302' },
   { urls: 'stun:stun4.l.google.com:19302' },
+  { urls: 'stun:stun.cloudflare.com:3478' },
+  { urls: 'stun:stun.services.mozilla.com' },
+  { urls: 'stun:global.stun.twilio.com:3478' },
   ...(import.meta.env.VITE_TURN_SERVER_URL ? [{
     urls: import.meta.env.VITE_TURN_SERVER_URL,
     username: import.meta.env.VITE_TURN_USERNAME || '',
@@ -534,16 +537,95 @@ export function WebRTCProvider({ children }) {
           setupDataConnection(conn);
         });
 
+        const connectToRemotePeer = (remoteId, remoteUid, remoteName, remotePhoto) => {
+          if (!remoteId || remoteId === id) return;
+          console.log(`[WebRTC] Connecting to remote peer: ${remoteId} (UID: ${remoteUid || 'N/A'})`);
+
+          remotePeerIdRef.current = remoteId;
+          setRemotePeerId(remoteId);
+
+          if (remoteName) setPartnerName(remoteName);
+          if (remotePhoto) setPartnerPhoto(remotePhoto);
+          if (remoteUid) {
+            setPartnerUid(remoteUid);
+            partnerUidRef.current = remoteUid;
+            const myUid = auth.currentUser?.uid || '';
+            if (myUid) {
+              const calculatedVaultId = [myUid, remoteUid].sort().join('_');
+              setVaultId(calculatedVaultId);
+              vaultIdRef.current = calculatedVaultId;
+              console.log('[Relationship Vault Established]:', calculatedVaultId);
+            }
+          }
+
+          // Call remote peer with local webcam stream
+          try {
+            const call = peer.call(remoteId, stream);
+            if (call) {
+              currentCallRef.current = call;
+
+              call.on('stream', (incomingStream) => {
+                console.log('[WebRTC] Received remote stream from peer:', remoteId);
+                setRemoteStream(incomingStream);
+                setIsConnected(true);
+              });
+
+              call.on('close', () => {
+                setRemoteStream(null);
+                setIsConnected(false);
+              });
+
+              call.on('error', (callErr) => {
+                console.warn('[WebRTC Call Error]:', callErr);
+              });
+            }
+          } catch (callErr) {
+            console.warn('[WebRTC] Peer call failed:', callErr);
+          }
+
+          // If we are already sharing screen, initiate a screen call as well
+          if (localScreenStreamRef.current) {
+            try {
+              const screenCall = peer.call(remoteId, localScreenStreamRef.current, {
+                metadata: { type: 'screen' }
+              });
+              screenCallRef.current = screenCall;
+              applyScreenSenderBitrateLimit(screenCall);
+            } catch (screenErr) {
+              console.warn('[WebRTC] Screen call failed:', screenErr);
+            }
+          }
+
+          // Connect data channel
+          try {
+            const conn = peer.connect(remoteId);
+            setupDataConnection(conn);
+          } catch (connErr) {
+            console.warn('[WebRTC] Peer data connect failed:', connErr);
+          }
+        };
+
         peer.on('open', (id) => {
           if (!isSubscribed) return;
           setPeerId(id);
           setIsPeerReady(true);
 
-          const socket = io(SIGNALING_SERVER_URL, { transports: ['websocket', 'polling'] });
+          console.log(`[PeerJS Ready] My Peer ID: ${id}. Connecting to Signaling Server: ${SIGNALING_SERVER_URL}`);
+
+          const socket = io(SIGNALING_SERVER_URL, { 
+            transports: ['websocket', 'polling'],
+            reconnectionAttempts: 10,
+            reconnectionDelay: 1000
+          });
           socketRef.current = socket;
           setSocket(socket);
 
+          socket.on('connect_error', (err) => {
+            console.warn('[Socket.io Connect Error] Ensure backend signaling server is running at', SIGNALING_SERVER_URL, err.message);
+          });
+
           socket.on('connect', () => {
+            console.log(`[Socket.io Connected] Joining Room: ${roomId}`);
             socket.emit('join-room', {
               roomId,
               peerId: id,
@@ -557,52 +639,23 @@ export function WebRTCProvider({ children }) {
             runMultiShotSequence({ totalShots: shots, initialDuration, intervalDuration });
           });
 
+          // Received list of existing users already in the room when we joined
+          socket.on('room-users', ({ users }) => {
+            console.log('[Socket.io] Room participants list received:', users);
+            if (users && users.length > 0) {
+              const existingPartner = users[0];
+              connectToRemotePeer(existingPartner.peerId, existingPartner.uid, existingPartner.name, existingPartner.photo);
+            }
+          });
+
+          // Received notification that a new user joined our room
           socket.on('user-connected', ({ peerId: remoteId, uid: remoteUid, name: remoteName, photo: remotePhoto }) => {
-            remotePeerIdRef.current = remoteId;
-            setRemotePeerId(remoteId);
-
-            if (remoteName) setPartnerName(remoteName);
-            if (remotePhoto) setPartnerPhoto(remotePhoto);
-            if (remoteUid) {
-              setPartnerUid(remoteUid);
-              partnerUidRef.current = remoteUid;
-              const myUid = auth.currentUser?.uid || '';
-              if (myUid) {
-                const calculatedVaultId = [myUid, remoteUid].sort().join('_');
-                setVaultId(calculatedVaultId);
-                vaultIdRef.current = calculatedVaultId;
-                console.log('[Relationship Vault Established via Socket.io]:', calculatedVaultId);
-              }
-            }
-
-            // Call remote peer with local webcam stream
-            const call = peer.call(remoteId, stream);
-            currentCallRef.current = call;
-
-            call.on('stream', (incomingStream) => {
-              setRemoteStream(incomingStream);
-              setIsConnected(true);
-            });
-
-            call.on('close', () => {
-              setRemoteStream(null);
-              setIsConnected(false);
-            });
-
-            // If we are already sharing screen, initiate a screen call as well
-            if (localScreenStreamRef.current) {
-              const screenCall = peer.call(remoteId, localScreenStreamRef.current, {
-                metadata: { type: 'screen' }
-              });
-              screenCallRef.current = screenCall;
-              applyScreenSenderBitrateLimit(screenCall);
-            }
-
-            const conn = peer.connect(remoteId);
-            setupDataConnection(conn);
+            console.log('[Socket.io] New user joined room:', remoteId);
+            connectToRemotePeer(remoteId, remoteUid, remoteName, remotePhoto);
           });
 
           socket.on('user-disconnected', () => {
+            console.log('[Socket.io] User disconnected from room');
             if (currentCallRef.current) currentCallRef.current.close();
             if (screenCallRef.current) screenCallRef.current.close();
             if (dataConnRef.current) dataConnRef.current.close();

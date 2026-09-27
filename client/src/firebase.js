@@ -1,5 +1,12 @@
-﻿import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { initializeApp } from 'firebase/app';
+import { 
+  getAuth, 
+  initializeAuth, 
+  indexedDBLocalPersistence, 
+  browserLocalPersistence, 
+  browserSessionPersistence, 
+  GoogleAuthProvider 
+} from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -15,9 +22,21 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase Auth & Firestore (No Firebase Storage)
-export const auth = getAuth(app);
+// Initialize Firebase Auth with multi-layer persistence (IndexedDB + LocalStorage + Session) for mobile compatibility
+let auth;
+try {
+  auth = initializeAuth(app, {
+    persistence: [indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence]
+  });
+} catch (e) {
+  auth = getAuth(app);
+}
+
+export { auth };
 export const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
 export const db = getFirestore(app);
 
 // Cloudinary Configuration for Image Storage
@@ -25,3 +44,4 @@ export const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/veyubpsm/image/up
 export const CLOUDINARY_UPLOAD_PRESET = "photobooth_preset";
 
 export default app;
+

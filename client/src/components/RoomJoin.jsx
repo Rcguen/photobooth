@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Sparkles, ArrowRight, ShieldCheck, Heart, LogOut, Lock, UserCheck, ShieldAlert } from 'lucide-react';
 import { auth, googleProvider } from '../firebase';
-import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+import { signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from 'firebase/auth';
 import { SHARED_VAULT_ID } from '../context/WebRTCContext';
 
 function GoogleIcon() {
@@ -40,6 +40,20 @@ export default function RoomJoin({ onJoin }) {
   const [authError, setAuthError] = useState(null);
 
   useEffect(() => {
+    // Check for redirect result on mobile/storage-partitioned return
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          setUser(result.user);
+        }
+      })
+      .catch((err) => {
+        console.warn('Redirect Auth notice:', err);
+        if (err.code && err.code !== 'auth/null-user' && err.code !== 'auth/missing-initial-state') {
+          setAuthError(err.message || 'Failed to complete redirect sign-in');
+        }
+      });
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
@@ -54,7 +68,18 @@ export default function RoomJoin({ onJoin }) {
       await signInWithPopup(auth, googleProvider);
     } catch (err) {
       console.error('Google Sign-in Error:', err);
-      setAuthError(err.message || 'Failed to sign in with Google');
+      if (err.code === 'auth/popup-blocked') {
+        try {
+          await signInWithRedirect(auth, googleProvider);
+          return;
+        } catch (redirectErr) {
+          setAuthError('Popup was blocked by your browser. Please allow popups or open in Safari/Chrome.');
+        }
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        // User closed the popup, no error needed
+      } else {
+        setAuthError(err.message || 'Failed to sign in with Google');
+      }
     } finally {
       setIsSigningIn(false);
     }

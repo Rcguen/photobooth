@@ -251,23 +251,23 @@ export default function VideoRoom({ onOpenGallery }) {
         <div className="fixed inset-0 z-50 bg-white pointer-events-none transition-opacity duration-200 animate-out fade-out" />
       )}
 
-      {/* Synchronized Big Countdown & Shot Overlay */}
+      {/* Synchronized Big Countdown & Shot Overlay (Transparent HUD - No Screen Blur) */}
       <AnimatePresence>
         {isCountingDown && countdown !== null && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 flex items-center justify-center bg-black/75 backdrop-blur-xl pointer-events-none"
+            className="fixed inset-0 z-40 flex items-center justify-center pointer-events-none"
           >
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
-              className="flex flex-col items-center justify-center gap-5"
+              className="flex flex-col items-center justify-center gap-3 p-5 rounded-3xl bg-black/40 border border-white/15 shadow-[0_15px_40px_rgba(0,0,0,0.8)]"
             >
-              <div className="px-6 py-2 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 font-semibold text-xs tracking-widest uppercase flex items-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.25)] backdrop-blur-2xl">
-                <Layers className="w-4 h-4 text-emerald-400" />
+              <div className="px-5 py-1.5 rounded-full bg-emerald-500/25 border border-emerald-400/50 text-emerald-300 font-semibold text-xs tracking-widest uppercase flex items-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.35)]">
+                <Layers className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Shot {currentShot} of {totalShots}</span>
               </div>
 
@@ -277,16 +277,16 @@ export default function VideoRoom({ onOpenGallery }) {
                   initial={{ scale: 1.4, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: 'spring', stiffness: 350, damping: 20 }}
-                  className="text-8xl sm:text-9xl font-black text-white drop-shadow-[0_0_60px_rgba(16,185,129,0.7)] tracking-tight font-mono"
+                  className="text-7xl sm:text-9xl font-black text-white drop-shadow-[0_4px_25px_rgba(0,0,0,0.9)] drop-shadow-[0_0_35px_rgba(16,185,129,0.9)] tracking-tight font-mono"
                 >
                   {countdown}
                 </motion.div>
               ) : (
                 <motion.div
                   initial={{ scale: 0.8 }}
-                  animate={{ scale: [1, 1.12, 1] }}
-                  transition={{ repeat: Infinity, duration: 0.6 }}
-                  className="text-5xl sm:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400 drop-shadow-[0_0_40px_rgba(16,185,129,0.8)]"
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ repeat: Infinity, duration: 0.5 }}
+                  className="text-4xl sm:text-6xl font-extrabold text-white drop-shadow-[0_4px_25px_rgba(0,0,0,0.9)] drop-shadow-[0_0_35px_rgba(16,185,129,1)]"
                 >
                   Smile! 📸
                 </motion.div>

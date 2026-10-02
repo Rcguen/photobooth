@@ -110,7 +110,7 @@ export default function MovieRoom() {
       {/* Main Cinematic Video Stage */}
       <div
         ref={cinemaContainerRef}
-        className="relative z-10 w-full flex-1 flex items-center justify-center bg-zinc-950/80 border border-white/10 border-t-white/20 rounded-3xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.85)] backdrop-blur-3xl"
+        className="relative z-10 w-full flex-1 flex items-center justify-center bg-zinc-950/95 md:bg-zinc-950/80 border border-white/10 border-t-white/20 rounded-3xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.85)] md:backdrop-blur-3xl"
       >
         {screenStream ? (
           /* Active Screen Share View */
@@ -218,7 +218,7 @@ export default function MovieRoom() {
           dragConstraints={cinemaContainerRef}
           dragElastic={0.1}
           dragMomentum={false}
-          className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-30 flex flex-col gap-1.5 p-2 bg-zinc-950/80 backdrop-blur-3xl border border-white/10 border-t-white/20 rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.7)] cursor-grab active:cursor-grabbing select-none max-w-[90vw]"
+          className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-30 flex flex-col gap-1.5 p-2 bg-zinc-950 md:bg-zinc-950/80 md:backdrop-blur-3xl border border-white/10 border-t-white/20 rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.7)] cursor-grab active:cursor-grabbing select-none max-w-[90vw]"
         >
           <div className="flex items-center justify-between gap-2 px-1 pb-1 border-b border-white/[0.08]">
             <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">
@@ -290,7 +290,7 @@ export default function MovieRoom() {
 
       {/* Floating Bottom Cinema Toolbar */}
       <footer className="relative z-20 flex items-center justify-center pt-2 sm:pt-3">
-        <div className="flex items-center gap-2 sm:gap-3.5 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-zinc-950/80 border border-white/10 border-t-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.7)] backdrop-blur-3xl">
+        <div className="flex items-center gap-2 sm:gap-3.5 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-zinc-950 md:bg-zinc-950/80 border border-white/10 border-t-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.7)] md:backdrop-blur-3xl">
           {/* Audio Mute */}
           <motion.button
             whileHover={{ scale: 1.08 }}

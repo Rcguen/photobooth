@@ -75,7 +75,7 @@ export default function PhotoModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/80 backdrop-blur-2xl animate-in fade-in duration-300 overflow-hidden select-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/90 md:bg-black/80 md:backdrop-blur-2xl animate-in fade-in duration-300 overflow-hidden select-none">
       
       {/* Modal Dialog Card */}
       <motion.div
@@ -83,7 +83,7 @@ export default function PhotoModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.94, y: 15 }}
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        className="relative max-w-lg w-full bg-zinc-900/80 border border-white/10 border-t-white/20 rounded-3xl overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.85)] flex flex-col h-[92vh] max-h-[92vh] backdrop-blur-3xl"
+        className="relative max-w-lg w-full bg-zinc-950 md:bg-zinc-900/80 border border-white/10 border-t-white/20 rounded-3xl overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.85)] flex flex-col h-[92vh] max-h-[92vh] md:backdrop-blur-3xl"
       >
         {/* Modal Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.08] bg-black/40 z-30 flex-shrink-0">

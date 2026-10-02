@@ -303,13 +303,13 @@ export default function VideoRoom({ onOpenGallery }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-2xl"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 md:bg-black/80 md:backdrop-blur-2xl"
           >
             <motion.div
               initial={{ scale: 0.92, opacity: 0, y: 15 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.92, opacity: 0, y: 15 }}
-              className="max-w-md w-full bg-zinc-900/80 border border-white/10 border-t-white/20 rounded-3xl p-6 sm:p-7 shadow-[0_25px_60px_rgba(0,0,0,0.8)] backdrop-blur-3xl"
+              className="max-w-md w-full bg-zinc-950 md:bg-zinc-900/80 border border-white/10 border-t-white/20 rounded-3xl p-6 sm:p-7 shadow-[0_25px_60px_rgba(0,0,0,0.8)] md:backdrop-blur-3xl"
             >
               <h3 className="text-base font-bold text-white mb-1.5 flex items-center gap-2">
                 <Heart className="w-4 h-4 text-emerald-400 fill-emerald-400" />
@@ -476,7 +476,7 @@ export default function VideoRoom({ onOpenGallery }) {
             initial={{ opacity: 0, y: 15, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 15, scale: 0.95 }}
-            className="relative z-30 max-w-md mx-auto mb-3 p-3.5 bg-zinc-950/70 border-t border-white/25 border-x border-white/10 border-b border-black/70 rounded-3xl backdrop-blur-3xl shadow-[0_25px_50px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.15)] flex flex-col gap-2.5"
+            className="relative z-30 max-w-md mx-auto mb-3 p-3.5 bg-zinc-950 md:bg-zinc-950/70 border-t border-white/25 border-x border-white/10 border-b border-black/70 rounded-3xl md:backdrop-blur-3xl shadow-[0_25px_50px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.15)] flex flex-col gap-2.5"
           >
             {/* Filters */}
             <div className="flex items-center justify-between gap-1.5">

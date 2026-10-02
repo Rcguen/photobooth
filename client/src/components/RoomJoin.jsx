@@ -138,7 +138,7 @@ export default function RoomJoin({ onJoin }) {
         initial={{ opacity: 0, y: 25, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 w-full max-w-md bg-gradient-to-b from-zinc-900/70 via-zinc-900/50 to-zinc-950/80 backdrop-blur-3xl border-t border-white/25 border-x border-white/10 border-b border-black/80 rounded-3xl p-7 sm:p-10 shadow-[0_30px_70px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.15)] shadow-emerald-500/10"
+        className="relative z-10 w-full max-w-md bg-zinc-900 md:bg-gradient-to-b md:from-zinc-900/70 md:via-zinc-900/50 md:to-zinc-950/80 md:backdrop-blur-3xl border-t border-white/25 border-x border-white/10 border-b border-black/80 rounded-3xl p-7 sm:p-10 shadow-[0_30px_70px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.15)] shadow-emerald-500/10"
       >
         {/* Top Light Catching Edge Highlight */}
         <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />

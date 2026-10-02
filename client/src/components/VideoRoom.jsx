@@ -32,21 +32,25 @@ const ViewfinderGuide = React.memo(function ViewfinderGuide({ label = 'Safe Zone
   return (
     <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden flex items-center justify-center">
       <div
-        className="relative h-full aspect-[438/620.5] max-w-full flex items-center justify-center"
+        className="relative h-[88%] sm:h-[92%] aspect-[438/620.5] max-w-[90%] flex items-center justify-center"
         style={{
-          boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.45)'
+          boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.55)'
         }}
       >
-        <div className="absolute inset-0 border-2 border-dashed border-emerald-400/80 rounded-2xl" />
-        <div className="absolute -top-1 -left-1 w-3.5 h-3.5 border-t-2 border-l-2 border-white" />
-        <div className="absolute -top-1 -right-1 w-3.5 h-3.5 border-t-2 border-r-2 border-white" />
-        <div className="absolute -bottom-1 -left-1 w-3.5 h-3.5 border-b-2 border-l-2 border-white" />
-        <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 border-b-2 border-r-2 border-white" />
-        <div className="absolute inset-0 flex items-center justify-center opacity-20">
-          <div className="w-full h-px bg-white/60" />
-          <div className="h-full w-px bg-white/60 absolute" />
+        <div className="absolute inset-0 border-2 border-dashed border-emerald-400/70 rounded-3xl" />
+        {/* Viewfinder corner brackets */}
+        <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-white rounded-tl-lg" />
+        <div className="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-white rounded-tr-lg" />
+        <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-white rounded-bl-lg" />
+        <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-white rounded-br-lg" />
+        
+        {/* Center Crosshair */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-30">
+          <div className="w-8 h-px bg-white" />
+          <div className="h-8 w-px bg-white absolute" />
         </div>
-        <div className="absolute bottom-3 px-2.5 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-[10px] font-mono font-medium text-emerald-300 border border-emerald-500/30">
+        
+        <div className="absolute bottom-4 px-3 py-1 rounded-full bg-black/80 backdrop-blur-md text-[10px] font-mono font-bold text-emerald-300 border border-emerald-500/40 shadow-lg">
           {label}
         </div>
       </div>

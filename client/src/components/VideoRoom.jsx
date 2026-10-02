@@ -558,22 +558,26 @@ export default function VideoRoom({ onOpenGallery }) {
             <motion.button
               whileHover={{ scale: 1.12 }}
               whileTap={{ scale: 0.9 }}
-              animate={{
-                boxShadow: [
-                  '0 0 20px rgba(16,185,129,0.5), inset 0 2px 4px rgba(255,255,255,0.7), inset 0 -2px 6px rgba(0,0,0,0.5)',
-                  '0 0 42px rgba(16,185,129,0.85), inset 0 2px 4px rgba(255,255,255,0.9), inset 0 -2px 6px rgba(0,0,0,0.5)',
-                  '0 0 20px rgba(16,185,129,0.5), inset 0 2px 4px rgba(255,255,255,0.7), inset 0 -2px 6px rgba(0,0,0,0.5)'
-                ]
-              }}
+              animate={
+                isConnected && !isCountingDown
+                  ? {
+                      boxShadow: [
+                        '0 0 20px rgba(16,185,129,0.5), inset 0 2px 4px rgba(255,255,255,0.7), inset 0 -2px 6px rgba(0,0,0,0.5)',
+                        '0 0 42px rgba(16,185,129,0.85), inset 0 2px 4px rgba(255,255,255,0.9), inset 0 -2px 6px rgba(0,0,0,0.5)',
+                        '0 0 20px rgba(16,185,129,0.5), inset 0 2px 4px rgba(255,255,255,0.7), inset 0 -2px 6px rgba(0,0,0,0.5)'
+                      ]
+                    }
+                  : { boxShadow: 'none' }
+              }
               transition={{
                 duration: 2.8,
                 repeat: Infinity,
                 ease: 'easeInOut'
               }}
               onClick={() => triggerMultiShot(4, 3, 2)}
-              disabled={isCountingDown}
-              title="Take 4-Shot Strip"
-              className="relative w-14 h-14 rounded-full p-[2px] bg-gradient-to-tr from-emerald-600 via-emerald-400 to-teal-300 border border-white/40 flex items-center justify-center disabled:opacity-50 group cursor-pointer"
+              disabled={isCountingDown || !isConnected}
+              title={!isConnected ? "Waiting for partner to join..." : "Take 4-Shot Strip"}
+              className="relative w-14 h-14 rounded-full p-[2px] bg-gradient-to-tr from-emerald-600 via-emerald-400 to-teal-300 border border-white/40 flex items-center justify-center disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed group cursor-pointer"
             >
               {/* Inner Gem Facet */}
               <div className="w-full h-full rounded-full bg-gradient-to-br from-emerald-400/40 via-teal-500/20 to-emerald-950/60 backdrop-blur-sm flex items-center justify-center border-t border-white/60 border-b border-black/40 group-hover:from-emerald-400/60 transition-all">

@@ -521,11 +521,12 @@ export function WebRTCProvider({ children }) {
 
     async function initConnection() {
       try {
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            width: { ideal: 480, max: 640 },
-            height: { ideal: 640, max: 480 },
-            frameRate: { ideal: 15, max: 24 },
+            width: isMobile ? { ideal: 360, max: 480 } : { ideal: 480, max: 640 },
+            height: isMobile ? { ideal: 480, max: 640 } : { ideal: 640, max: 480 },
+            frameRate: isMobile ? { ideal: 12, max: 15 } : { ideal: 15, max: 24 },
             facingMode: 'user'
           },
           audio: true

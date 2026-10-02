@@ -8,7 +8,7 @@ import { useTexture, Float, PresentationControls } from '@react-three/drei';
 export function optimizeCloudinaryUrl(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('cloudinary.com') && url.includes('/upload/') && !url.includes('/upload/q_auto')) {
-    return url.replace('/upload/', '/upload/q_auto,f_auto,w_800/');
+    return url.replace('/upload/', '/upload/q_auto,f_auto,w_512/');
   }
   return url;
 }

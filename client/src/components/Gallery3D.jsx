@@ -176,58 +176,63 @@ export default function Gallery3D({ strips = [], onBackToBooth, isActive = true 
             <span className="text-xs text-zinc-400 font-mono">Syncing 3D scrapbook from cloud...</span>
           </div>
         ) : hasStrips ? (
-          <>
-            <Canvas
-              frameloop={isActive ? 'always' : 'demand'}
-              dpr={[1, 1.5]}
-              performance={{ min: 0.5 }}
-              camera={{ position: [0, 0, 5.2], fov: 48 }}
-              className="w-full h-full cursor-grab active:cursor-grabbing"
-              gl={{
-                antialias: typeof window !== 'undefined' ? window.innerWidth > 768 : false,
-                powerPreference: 'high-performance'
-              }}
-            >
-              {/* Soft, warm photobooth ambient lighting */}
-              <ambientLight intensity={0.9} />
+          (() => {
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            return (
+              <>
+                <Canvas
+                  frameloop={isActive ? 'always' : 'demand'}
+                  dpr={isMobile ? 1 : [1, 1.5]}
+                  performance={{ min: 0.5 }}
+                  camera={{ position: [0, 0, 5.2], fov: 48 }}
+                  className="w-full h-full cursor-grab active:cursor-grabbing"
+                  gl={{
+                    antialias: !isMobile,
+                    powerPreference: 'high-performance'
+                  }}
+                >
+                  {/* Soft, warm photobooth ambient lighting */}
+                  <ambientLight intensity={0.9} />
 
-              {/* Main key spotlight */}
-              <spotLight
-                position={[4, 6, 5]}
-                angle={0.5}
-                penumbra={0.9}
-                intensity={1.6}
-              />
+                  {/* Main key spotlight */}
+                  <spotLight
+                    position={[4, 6, 5]}
+                    angle={0.5}
+                    penumbra={0.9}
+                    intensity={1.6}
+                  />
 
-              {/* Cool emerald & warm rim lights */}
-              <directionalLight position={[-3, -2, -3]} intensity={0.45} color="#10b981" />
-              <directionalLight position={[3, -2, 2]} intensity={0.3} color="#14b8a6" />
+                  {/* Cool emerald & warm rim lights */}
+                  <directionalLight position={[-3, -2, -3]} intensity={0.45} color="#10b981" />
+                  <directionalLight position={[3, -2, 2]} intensity={0.3} color="#14b8a6" />
 
-              {/* Floating ambient sparkles (Optimized count for mobile GPU) */}
-              <Sparkles
-                count={22}
-                scale={6}
-                size={2.0}
-                speed={0.25}
-                color="#34d399"
-                opacity={0.35}
-              />
+                  {/* Floating ambient sparkles (Optimized count for mobile GPU) */}
+                  <Sparkles
+                    count={isMobile ? 10 : 22}
+                    scale={6}
+                    size={2.0}
+                    speed={0.25}
+                    color="#34d399"
+                    opacity={0.35}
+                  />
 
-              {/* Soft baked floor shadow */}
-              <ContactShadows
-                position={[0, -2.4, 0]}
-                opacity={0.55}
-                scale={7}
-                blur={2.0}
-                far={3.5}
-                resolution={512}
-              />
+                  {/* Soft baked floor shadow (Disabled on mobile to save GPU fill rate) */}
+                  {!isMobile && (
+                    <ContactShadows
+                      position={[0, -2.4, 0]}
+                      opacity={0.55}
+                      scale={7}
+                      blur={2.0}
+                      far={3.5}
+                      resolution={512}
+                    />
+                  )}
 
-              {/* 3D Strip Mesh */}
-              <Suspense fallback={<Loader />}>
-                <StripMesh key={currentStripUrl} textureUrl={currentStripUrl} />
-              </Suspense>
-            </Canvas>
+                  {/* 3D Strip Mesh */}
+                  <Suspense fallback={<Loader />}>
+                    <StripMesh key={currentStripUrl} textureUrl={currentStripUrl} />
+                  </Suspense>
+                </Canvas>
 
             {/* Left / Right Strip Switchers */}
             {allStrips.length > 1 && (
@@ -250,6 +255,8 @@ export default function Gallery3D({ strips = [], onBackToBooth, isActive = true 
               </>
             )}
           </>
+            );
+          })()
         ) : (
           /* Empty State */
           <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center">

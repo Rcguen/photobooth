@@ -372,7 +372,7 @@ export default function VideoRoom({ onOpenGallery }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 w-full max-w-4xl max-h-[72vh]">
           
           {/* Local Video Frame */}
-          <div className="relative aspect-[4/3] bg-white/[0.025] backdrop-blur-3xl rounded-3xl overflow-hidden border-t border-white/20 border-x border-white/10 border-b border-black/70 shadow-[0_30px_70px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.15)] shadow-emerald-500/10 group">
+          <div className="relative aspect-[4/3] bg-zinc-900 md:bg-white/[0.025] md:backdrop-blur-3xl rounded-3xl overflow-hidden border-t border-white/20 border-x border-white/10 border-b border-black/70 shadow-[0_30px_70px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.15)] shadow-emerald-500/10 group">
             {/* Top Light Catching Edge Highlight */}
             <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none z-30" />
 
@@ -419,7 +419,7 @@ export default function VideoRoom({ onOpenGallery }) {
           </div>
 
           {/* Remote Video Frame */}
-          <div className="relative aspect-[4/3] bg-white/[0.025] backdrop-blur-3xl rounded-3xl overflow-hidden border-t border-white/20 border-x border-white/10 border-b border-black/70 shadow-[0_30px_70px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.15)] shadow-emerald-500/10">
+          <div className="relative aspect-[4/3] bg-zinc-900 md:bg-white/[0.025] md:backdrop-blur-3xl rounded-3xl overflow-hidden border-t border-white/20 border-x border-white/10 border-b border-black/70 shadow-[0_30px_70px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.15)] shadow-emerald-500/10">
             {/* Top Light Catching Edge Highlight */}
             <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none z-30" />
 

@@ -28,36 +28,6 @@ import {
   Minimize2
 } from 'lucide-react';
 
-const ViewfinderGuide = React.memo(function ViewfinderGuide({ label = 'Safe Zone' }) {
-  return (
-    <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden flex items-center justify-center">
-      <div
-        className="relative h-[88%] sm:h-[92%] aspect-[438/620.5] max-w-[90%] flex items-center justify-center"
-        style={{
-          boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.55)'
-        }}
-      >
-        <div className="absolute inset-0 border-2 border-dashed border-emerald-400/70 rounded-3xl" />
-        {/* Viewfinder corner brackets */}
-        <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-white rounded-tl-lg" />
-        <div className="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-white rounded-tr-lg" />
-        <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-white rounded-bl-lg" />
-        <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-white rounded-br-lg" />
-        
-        {/* Center Crosshair */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-30">
-          <div className="w-8 h-px bg-white" />
-          <div className="h-8 w-px bg-white absolute" />
-        </div>
-        
-        <div className="absolute bottom-4 px-3 py-1 rounded-full bg-black/80 backdrop-blur-md text-[10px] font-mono font-bold text-emerald-300 border border-emerald-500/40 shadow-lg">
-          {label}
-        </div>
-      </div>
-    </div>
-  );
-});
-
 export default function VideoRoom({ onOpenGallery }) {
   const {
     roomId,
@@ -102,7 +72,6 @@ export default function VideoRoom({ onOpenGallery }) {
   // Customization & Viewfinder State
   const [activeFilter, setActiveFilter] = useState('normal');
   const [activeTheme, setActiveTheme] = useState('cream');
-  const [showCropGuide, setShowCropGuide] = useState(true);
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
   const [isEditingNames, setIsEditingNames] = useState(false);
   const [editLocal, setEditLocal] = useState(localName);
@@ -373,12 +342,12 @@ export default function VideoRoom({ onOpenGallery }) {
         )}
       </AnimatePresence>
 
-      {/* Main Video Viewports */}
-      <main className="relative z-10 flex-1 flex items-center justify-center max-w-6xl mx-auto w-full my-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 w-full max-w-4xl max-h-[72vh]">
+      {/* Main Video Viewports - 1:1 Accurate Aspect Ratio */}
+      <main className="relative z-10 flex-1 flex items-center justify-center max-w-6xl mx-auto w-full my-auto px-2">
+        <div className="flex flex-row items-center justify-center gap-3 sm:gap-8 w-full h-full max-h-[75vh]">
           
           {/* Local Video Frame */}
-          <div className="relative aspect-[4/3] bg-zinc-900 md:bg-white/[0.025] md:backdrop-blur-3xl rounded-3xl overflow-hidden border-t border-white/20 border-x border-white/10 border-b border-black/70 shadow-[0_30px_70px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.15)] shadow-emerald-500/10 group">
+          <div className="relative w-1/2 max-w-[400px] aspect-[438/620.5] bg-zinc-900 md:bg-white/[0.025] md:backdrop-blur-3xl rounded-2xl md:rounded-3xl overflow-hidden border-t border-white/20 border-x border-white/10 border-b border-black/70 shadow-[0_30px_70px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.15)] shadow-emerald-500/10 group">
             {/* Top Light Catching Edge Highlight */}
             <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none z-30" />
 
@@ -391,21 +360,17 @@ export default function VideoRoom({ onOpenGallery }) {
               className={`w-full h-full object-cover -scale-x-100 transition-all duration-300 ${isVideoOff ? 'hidden' : 'block'}`}
             />
 
-            {showCropGuide && !isVideoOff && (
-              <ViewfinderGuide label={`${localName}'s Safe Zone`} />
-            )}
-
             {isVideoOff && (
               <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-950/80 text-zinc-500 gap-2">
-                <VideoOff className="w-10 h-10 stroke-1 text-zinc-600" />
-                <span className="text-xs font-medium text-zinc-400">Camera is paused</span>
+                <VideoOff className="w-8 h-8 sm:w-10 sm:h-10 stroke-1 text-zinc-600" />
+                <span className="text-[10px] sm:text-xs font-medium text-zinc-400">Camera off</span>
               </div>
             )}
 
             {/* Glassmorphic Badge */}
-            <div className="absolute top-3.5 left-3.5 z-30 bg-black/60 backdrop-blur-2xl px-3 py-1.5 rounded-full text-xs font-medium border-t border-white/25 border-x border-white/10 border-b border-black/60 flex items-center gap-2 shadow-[0_8px_20px_rgba(0,0,0,0.6)]">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,1)]"></span>
-              <span className="text-zinc-200 font-medium">{localName} (You)</span>
+            <div className="absolute top-2 left-2 sm:top-3.5 sm:left-3.5 z-30 bg-black/60 backdrop-blur-2xl px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-[9px] sm:text-xs font-medium border-t border-white/25 border-x border-white/10 border-b border-black/60 flex items-center gap-1.5 sm:gap-2 shadow-[0_8px_20px_rgba(0,0,0,0.6)]">
+              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,1)]"></span>
+              <span className="text-zinc-200 font-medium truncate max-w-[70px] sm:max-w-[120px]">{localName}</span>
               <button
                 onClick={() => setIsEditingNames(true)}
                 title="Edit Name"
@@ -415,51 +380,48 @@ export default function VideoRoom({ onOpenGallery }) {
               </button>
             </div>
 
-            <div className="absolute bottom-3.5 left-3.5 z-30 flex gap-2">
+            <div className="absolute bottom-2 left-2 sm:bottom-3.5 sm:left-3.5 z-30 flex gap-2">
               {isMuted && (
-                <div className="bg-red-500/25 border border-red-500/40 backdrop-blur-md p-1.5 rounded-xl text-red-300 shadow-lg">
-                  <MicOff className="w-3.5 h-3.5" />
+                <div className="bg-red-500/25 border border-red-500/40 backdrop-blur-md p-1 sm:p-1.5 rounded-lg sm:rounded-xl text-red-300 shadow-lg">
+                  <MicOff className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 </div>
               )}
             </div>
           </div>
 
           {/* Remote Video Frame */}
-          <div className="relative aspect-[4/3] bg-zinc-900 md:bg-white/[0.025] md:backdrop-blur-3xl rounded-3xl overflow-hidden border-t border-white/20 border-x border-white/10 border-b border-black/70 shadow-[0_30px_70px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.15)] shadow-emerald-500/10">
+          <div className="relative w-1/2 max-w-[400px] aspect-[438/620.5] bg-zinc-900 md:bg-white/[0.025] md:backdrop-blur-3xl rounded-2xl md:rounded-3xl overflow-hidden border-t border-white/20 border-x border-white/10 border-b border-black/70 shadow-[0_30px_70px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.15)] shadow-emerald-500/10">
             {/* Top Light Catching Edge Highlight */}
             <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none z-30" />
 
             {remoteStream ? (
-              <>
-                <video
-                  ref={remoteVideoRef}
-                  autoPlay
-                  playsInline
-                  style={currentVideoFilterStyle}
-                  className="w-full h-full object-cover transition-all duration-300"
-                />
-
-                {showCropGuide && (
-                  <ViewfinderGuide label={`${partnerName}'s Safe Zone`} />
-                )}
-              </>
+              <video
+                ref={remoteVideoRef}
+                autoPlay
+                playsInline
+                style={currentVideoFilterStyle}
+                className="w-full h-full object-cover transition-all duration-300"
+              />
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-950/80 p-6 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-3 text-zinc-400 animate-pulse shadow-inner">
-                  <Users className="w-7 h-7 text-emerald-400/90" />
+              <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-950/80 p-3 sm:p-6 text-center">
+                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-2 sm:mb-3 text-zinc-400 animate-pulse shadow-inner">
+                  <Users className="w-5 h-5 sm:w-7 sm:h-7 text-emerald-400/90" />
                 </div>
-                <h3 className="text-sm font-semibold text-zinc-200 mb-1">
-                  Waiting for {partnerName} to join...
+                <h3 className="text-[10px] sm:text-sm font-semibold text-zinc-200 mb-1 leading-tight hidden sm:block">
+                  Waiting for {partnerName}...
                 </h3>
-                <p className="text-xs text-zinc-500 max-w-xs mb-3.5">
-                  Share Room Code <span className="text-emerald-400 font-mono font-bold">{roomId}</span>
+                <h3 className="text-[10px] sm:text-sm font-semibold text-zinc-200 mb-1 leading-tight sm:hidden">
+                  Waiting...
+                </h3>
+                <p className="text-[9px] sm:text-xs text-zinc-500 max-w-xs mb-2 sm:mb-3.5">
+                  Code: <span className="text-emerald-400 font-mono font-bold">{roomId}</span>
                 </p>
                 <button
                   onClick={copyRoomLink}
-                  className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-2 transition-all hover:border-white/25 shadow-lg"
+                  className="px-2 py-1.5 sm:px-4 sm:py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg sm:rounded-xl text-[9px] sm:text-xs font-medium text-zinc-200 flex items-center gap-1.5 sm:gap-2 transition-all hover:border-white/25 shadow-lg"
                 >
-                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-zinc-400" />}
-                  <span>{copied ? 'Copied to Clipboard' : 'Copy Invitation'}</span>
+                  {copied ? <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400" /> : <Copy className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-zinc-400" />}
+                  <span className="hidden sm:inline">{copied ? 'Copied' : 'Copy Invite'}</span>
                 </button>
               </div>
             )}
@@ -574,19 +536,7 @@ export default function VideoRoom({ onOpenGallery }) {
               {isVideoOff ? <VideoOff className="w-4 h-4" /> : <Video className="w-4 h-4" />}
             </motion.button>
 
-            <motion.button
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.92 }}
-              onClick={() => setShowCropGuide((prev) => !prev)}
-              title={showCropGuide ? 'Hide Viewfinder Guides' : 'Show Viewfinder Guides'}
-              className={`p-3 rounded-full transition-all ${
-                showCropGuide
-                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-[0_0_18px_rgba(16,185,129,0.3)]'
-                  : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 border-t border-white/15 border-white/5 shadow-inner'
-              }`}
-            >
-              <Scan className="w-4 h-4" />
-            </motion.button>
+            {/* Crop guide button removed as the video aspect ratio now exactly matches the safe zone */}
           </div>
 
           {/* Central Prominent Glowing Gem Shutter Button */}

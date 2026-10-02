@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { ContactShadows, Sparkles, Html } from '@react-three/drei';
+import { ContactShadows, Sparkles, Html, PerformanceMonitor } from '@react-three/drei';
 import StripMesh from './StripMesh';
 import { useWebRTC } from '../context/WebRTCContext';
 import { db } from '../firebase';
@@ -35,6 +35,7 @@ export default function Gallery3D({ strips = [], onBackToBooth, isActive = true 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [cloudStrips, setCloudStrips] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [dpr, setDpr] = useState(1);
 
   // Firestore Real-Time Data Hydration from Dynamic Relationship Vault
   useEffect(() => {
@@ -178,11 +179,12 @@ export default function Gallery3D({ strips = [], onBackToBooth, isActive = true 
         ) : hasStrips ? (
           (() => {
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
             return (
               <>
                 <Canvas
                   frameloop={isActive ? 'always' : 'demand'}
-                  dpr={isMobile ? 1 : [1, 1.5]}
+                  dpr={dpr}
                   performance={{ min: 0.5 }}
                   camera={{ position: [0, 0, 5.2], fov: 48 }}
                   className="w-full h-full cursor-grab active:cursor-grabbing"
@@ -191,6 +193,10 @@ export default function Gallery3D({ strips = [], onBackToBooth, isActive = true 
                     powerPreference: 'high-performance'
                   }}
                 >
+                  <PerformanceMonitor 
+                    onDecline={() => setDpr(isMobile ? 0.75 : 1)} 
+                    onIncline={() => setDpr(isMobile ? 1 : 1.5)} 
+                  />
                   {/* Soft, warm photobooth ambient lighting */}
                   <ambientLight intensity={0.9} />
 

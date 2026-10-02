@@ -8,7 +8,9 @@ import { useTexture, Float, PresentationControls } from '@react-three/drei';
 export function optimizeCloudinaryUrl(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('cloudinary.com') && url.includes('/upload/') && !url.includes('/upload/q_auto')) {
-    return url.replace('/upload/', '/upload/q_auto,f_auto,w_512/');
+    const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const width = isMobile ? 'w_256' : 'w_512';
+    return url.replace('/upload/', `/upload/q_auto,f_auto,${width}/`);
   }
   return url;
 }

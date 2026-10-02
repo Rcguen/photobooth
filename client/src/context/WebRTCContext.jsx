@@ -389,6 +389,42 @@ export function WebRTCProvider({ children }) {
     }
   }, []);
 
+  const applyWebcamSenderBitrateLimit = useCallback((call) => {
+    if (!call || !call.peerConnection) return;
+    const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    const applyParameters = () => {
+      try {
+        const senders = call.peerConnection.getSenders();
+        senders.forEach((sender) => {
+          if (sender.track && sender.track.kind === 'video') {
+            const params = sender.getParameters();
+            if (!params.encodings || params.encodings.length === 0) {
+              params.encodings = [{}];
+            }
+            // Adaptive Bitrate: Mobile capped at 400kbps, PC at 800kbps to prioritize audio on weak 3G/4G
+            params.encodings[0].maxBitrate = isMobile ? 400000 : 800000;
+            params.encodings[0].networkPriority = 'low'; // Prioritize audio track (which defaults to 'high')
+            sender.setParameters(params).catch((e) => {
+              console.warn('[WebRTC] Error applying webcam sender bitrate cap:', e);
+            });
+          }
+        });
+      } catch (e) {
+        console.warn('[WebRTC] Could not inspect senders for webcam bitrate limit:', e);
+      }
+    };
+
+    applyParameters();
+    if (call.peerConnection) {
+      call.peerConnection.addEventListener('connectionstatechange', () => {
+        if (call.peerConnection.connectionState === 'connected') {
+          applyParameters();
+        }
+      });
+    }
+  }, []);
+
   const startScreenShare = useCallback(async () => {
     try {
       const displayStream = await navigator.mediaDevices.getDisplayMedia({
@@ -582,6 +618,7 @@ export function WebRTCProvider({ children }) {
             const call = peer.call(remoteId, stream);
             if (call) {
               currentCallRef.current = call;
+              applyWebcamSenderBitrateLimit(call);
 
               call.on('stream', (incomingStream) => {
                 console.log('[WebRTC] Received remote stream from peer:', remoteId);
@@ -712,6 +749,7 @@ export function WebRTCProvider({ children }) {
               setRemoteStream(incomingStream);
               setIsConnected(true);
             });
+            applyWebcamSenderBitrateLimit(incomingCall);
 
             incomingCall.on('close', () => {
               setRemoteStream(null);
@@ -761,7 +799,7 @@ export function WebRTCProvider({ children }) {
       setCountdown(null);
       setCurrentShot(null);
     };
-  }, [roomId, runMultiShotSequence, setupDataConnection]);
+  }, [roomId, runMultiShotSequence, setupDataConnection, applyWebcamSenderBitrateLimit, applyScreenSenderBitrateLimit]);
 
   // Combined screenStream (whichever is active: local or remote)
   const screenStream = localScreenStream || remoteScreenStream;

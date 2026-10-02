@@ -28,7 +28,7 @@ import {
   Minimize2
 } from 'lucide-react';
 
-function ViewfinderGuide({ label = 'Safe Zone' }) {
+const ViewfinderGuide = React.memo(function ViewfinderGuide({ label = 'Safe Zone' }) {
   return (
     <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden flex items-center justify-center">
       <div
@@ -52,7 +52,7 @@ function ViewfinderGuide({ label = 'Safe Zone' }) {
       </div>
     </div>
   );
-}
+});
 
 export default function VideoRoom({ onOpenGallery }) {
   const {
@@ -277,6 +277,7 @@ export default function VideoRoom({ onOpenGallery }) {
                   initial={{ scale: 1.4, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: 'spring', stiffness: 350, damping: 20 }}
+                  style={{ willChange: 'transform, opacity' }}
                   className="text-7xl sm:text-9xl font-black text-white drop-shadow-[0_4px_25px_rgba(0,0,0,0.9)] drop-shadow-[0_0_35px_rgba(16,185,129,0.9)] tracking-tight font-mono"
                 >
                   {countdown}
@@ -286,6 +287,7 @@ export default function VideoRoom({ onOpenGallery }) {
                   initial={{ scale: 0.8 }}
                   animate={{ scale: [1, 1.1, 1] }}
                   transition={{ repeat: Infinity, duration: 0.5 }}
+                  style={{ willChange: 'transform' }}
                   className="text-4xl sm:text-6xl font-extrabold text-white drop-shadow-[0_4px_25px_rgba(0,0,0,0.9)] drop-shadow-[0_0_35px_rgba(16,185,129,1)]"
                 >
                   Smile! 📸

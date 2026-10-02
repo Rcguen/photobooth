@@ -2,7 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Sparkles, ArrowRight, ShieldCheck, Heart, LogOut, Lock, UserCheck, ShieldAlert } from 'lucide-react';
 import { auth, googleProvider } from '../firebase';
-import { signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from 'firebase/auth';
+import { 
+  signInWithPopup, 
+  signInWithRedirect, 
+  getRedirectResult, 
+  signOut, 
+  onAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence 
+} from 'firebase/auth';
 import { SHARED_VAULT_ID } from '../context/WebRTCContext';
 
 function GoogleIcon() {
@@ -65,7 +73,15 @@ export default function RoomJoin({ onJoin }) {
     setIsSigningIn(true);
     setAuthError(null);
     try {
-      await signInWithPopup(auth, googleProvider);
+      // Explicitly configure browserLocalPersistence to prevent storage partitioning loss on mobile
+      await setPersistence(auth, browserLocalPersistence);
+
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        await signInWithRedirect(auth, googleProvider);
+      } else {
+        await signInWithPopup(auth, googleProvider);
+      }
     } catch (err) {
       console.error('Google Sign-in Error:', err);
       if (err.code === 'auth/popup-blocked') {

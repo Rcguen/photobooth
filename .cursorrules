@@ -1,0 +1,16 @@
+# Cursor Rules - Core Engineering Workflow (ECC System)
+
+## 7-Step Core Workflow
+
+1. **Plan**: Analyze the task, check constraints, examine existing architecture, and create a structured plan before making code modifications.
+2. **Test**: Identify failure scenarios and verify how changes will be tested (unit, integration, or visual smoke testing).
+3. **Implement**: Perform surgical, atomic changes adhering strictly to project design patterns and architectural integrity.
+4. **Review**: Audit code diffs to ensure no unintended breaking changes, syntax issues, or regressions were introduced.
+5. **Verify**: Run build commands (`npm run build`) and runtime checks to ensure complete system stability.
+6. **Remember**: Record key learnings, environment gotchas, and architectural conventions.
+7. **Improve**: Continuously refactor for performance, latency, mobile responsiveness, and clean code.
+
+---
+
+## Automation Mandate
+- After successful verification and build checks, the agent must **always automatically stage, commit, and push** the changes to the active branch (`ritchi` or current branch) without blocking for manual prompt confirmation.

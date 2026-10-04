@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Download, X, Sparkles, RefreshCw, Heart, Trash2, Smile } from 'lucide-react';
 
-const STICKER_PALETTE = ['💖', '✨', '🎀', '🧸', '🌸', '🍒', '💌', '📸', '⭐', '🍓', '🥂', '🕊️'];
+const STICKER_PALETTE = ['💖', '✨', '🔥', '👑', '💯', '🌸', '蝴蝶', '🎀', '🎉', '🦋', '⭐', '🎈'];
 
 export default function PhotoModal({
   imageSrc,
@@ -83,12 +83,12 @@ export default function PhotoModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.94, y: 15 }}
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        className="relative max-w-lg w-full bg-zinc-950 md:bg-zinc-900/80 border border-white/10 border-t-white/20 rounded-3xl overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.85)] flex flex-col h-[92vh] max-h-[92vh] md:backdrop-blur-3xl"
+        className="relative max-w-lg w-full bg-zinc-900/90 border border-white/5 rounded-3xl overflow-hidden shadow-2xl flex flex-col h-[92vh] max-h-[92vh] backdrop-blur-xl"
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.08] bg-black/40 z-30 flex-shrink-0">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.08] bg-zinc-950/50 z-30 flex-shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 border border-emerald-400/30 text-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-500/10">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-400/20 text-emerald-400 flex items-center justify-center">
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
@@ -96,7 +96,7 @@ export default function PhotoModal({
                 Decorate Photobooth Strip <Heart className="w-3.5 h-3.5 text-emerald-400 inline fill-emerald-400" />
               </h2>
               <p className="text-[10px] text-zinc-400">
-                Drag stickers anywhere • Synced live with partner
+                Drag stickers anywhere · Synced live with partner
               </p>
             </div>
           </div>
@@ -110,10 +110,10 @@ export default function PhotoModal({
         </div>
 
         {/* Photobooth Strip Viewport */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 flex justify-center bg-black/50 select-none">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 flex justify-center bg-zinc-950/50 select-none">
           <div
             ref={containerRef}
-            className="relative max-w-[280px] sm:max-w-[320px] md:max-w-[340px] w-full shadow-[0_15px_40px_rgba(0,0,0,0.8)] rounded-2xl border border-white/10 my-auto touch-none"
+            className="relative max-w-[280px] sm:max-w-[320px] md:max-w-[340px] w-full shadow-xl rounded-2xl border border-white/10 my-auto touch-none"
           >
             {/* Full Strip Base Image */}
             <img
@@ -154,7 +154,7 @@ export default function PhotoModal({
         </div>
 
         {/* Sticker Tray Bar */}
-        <div className="px-4 py-2.5 bg-black/50 border-t border-white/[0.08] flex items-center justify-between gap-2 z-30 flex-shrink-0">
+        <div className="px-4 py-2.5 bg-zinc-950/50 border-t border-white/[0.05] flex items-center justify-between gap-2 z-30 flex-shrink-0">
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <Smile className="w-3.5 h-3.5 text-emerald-400" />
             <span className="text-[11px] font-semibold text-zinc-400 hidden sm:inline">Stickers:</span>
@@ -165,7 +165,7 @@ export default function PhotoModal({
               <button
                 key={emoji}
                 onClick={() => onAddSticker && onAddSticker(emoji, 0.5, 0.45)}
-                className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 hover:scale-110 active:scale-95 text-lg flex items-center justify-center transition-all border border-white/10 shadow-sm flex-shrink-0"
+                className="w-10 h-10 rounded-xl bg-zinc-800 hover:bg-zinc-700 hover:scale-110 active:scale-95 text-xl flex items-center justify-center transition-all flex-shrink-0"
               >
                 {emoji}
               </button>
@@ -184,12 +184,12 @@ export default function PhotoModal({
         </div>
 
         {/* Actions Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-t border-white/[0.08] bg-black/60 z-30 flex-shrink-0">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-t border-white/[0.05] bg-zinc-950/80 z-30 flex-shrink-0">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={onRetake}
-            className="px-3.5 py-2 bg-white/5 hover:bg-white/10 text-zinc-300 rounded-xl text-xs font-medium flex items-center gap-1.5 border border-white/10 transition-colors"
+            className="px-4 py-2.5 bg-zinc-800 text-white hover:bg-zinc-700 rounded-xl text-sm font-medium flex items-center gap-2 transition-colors"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Retake</span>
@@ -198,7 +198,7 @@ export default function PhotoModal({
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="px-3 py-2 text-zinc-400 hover:text-zinc-200 text-xs font-medium transition-colors"
+              className="px-3 py-2 text-zinc-400 hover:text-white text-sm font-medium transition-colors"
             >
               Close
             </button>
@@ -206,7 +206,7 @@ export default function PhotoModal({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleDownload}
-              className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold rounded-2xl text-xs shadow-[0_10px_25px_rgba(16,185,129,0.35)] border border-emerald-400/30 flex items-center gap-2 transition-all"
+              className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold rounded-xl text-sm flex items-center gap-2 transition-colors"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Download Strip</span>

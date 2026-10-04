@@ -138,10 +138,8 @@ export default function RoomJoin({ onJoin }) {
         initial={{ opacity: 0, y: 25, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 w-full max-w-md bg-zinc-900 md:bg-gradient-to-b md:from-zinc-900/70 md:via-zinc-900/50 md:to-zinc-950/80 md:backdrop-blur-3xl border-t border-white/25 border-x border-white/10 border-b border-black/80 rounded-3xl p-7 sm:p-10 shadow-[0_30px_70px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.15)] shadow-emerald-500/10"
+        className="relative z-10 w-full max-w-md bg-zinc-900/60 backdrop-blur-xl border border-white/5 rounded-3xl p-7 sm:p-10 shadow-2xl"
       >
-        {/* Top Light Catching Edge Highlight */}
-        <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
 
         {/* Brand Icon & Header */}
         <div className="flex flex-col items-center text-center mb-7">
@@ -152,8 +150,8 @@ export default function RoomJoin({ onJoin }) {
             whileHover={{ scale: 1.08, rotate: 3 }}
             className="relative mb-4 cursor-pointer"
           >
-            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-3xl bg-gradient-to-tr from-emerald-500/20 via-teal-500/25 to-emerald-400/10 border border-emerald-400/30 flex items-center justify-center text-emerald-400 shadow-[0_0_35px_rgba(16,185,129,0.35)] backdrop-blur-xl">
-              <Camera className="w-8 h-8 sm:w-9 sm:h-9 drop-shadow" />
+            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-3xl bg-emerald-500/10 border border-emerald-400/20 flex items-center justify-center text-emerald-400 backdrop-blur-xl">
+              <Camera className="w-8 h-8 sm:w-9 sm:h-9" />
             </div>
             <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>

@@ -347,9 +347,8 @@ export default function VideoRoom({ onOpenGallery }) {
         <div className="flex flex-row items-center justify-center gap-3 sm:gap-8 w-full h-full max-h-[75vh]">
           
           {/* Local Video Frame */}
-          <div className="relative w-1/2 max-w-[400px] aspect-[438/620.5] bg-zinc-900 md:bg-white/[0.025] md:backdrop-blur-3xl rounded-2xl md:rounded-3xl overflow-hidden border-t border-white/20 border-x border-white/10 border-b border-black/70 shadow-[0_30px_70px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.15)] shadow-emerald-500/10 group">
-            {/* Top Light Catching Edge Highlight */}
-            <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none z-30" />
+          <div className="relative w-1/2 max-w-[400px] aspect-[438/620.5] bg-zinc-900/40 rounded-2xl md:rounded-3xl overflow-hidden border border-white/5 shadow-2xl group">
+            
 
             <video
               ref={localVideoRef}
@@ -390,9 +389,8 @@ export default function VideoRoom({ onOpenGallery }) {
           </div>
 
           {/* Remote Video Frame */}
-          <div className="relative w-1/2 max-w-[400px] aspect-[438/620.5] bg-zinc-900 md:bg-white/[0.025] md:backdrop-blur-3xl rounded-2xl md:rounded-3xl overflow-hidden border-t border-white/20 border-x border-white/10 border-b border-black/70 shadow-[0_30px_70px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.15)] shadow-emerald-500/10">
-            {/* Top Light Catching Edge Highlight */}
-            <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none z-30" />
+          <div className="relative w-1/2 max-w-[400px] aspect-[438/620.5] bg-zinc-900/40 rounded-2xl md:rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
+            
 
             {remoteStream ? (
               <video
@@ -504,7 +502,7 @@ export default function VideoRoom({ onOpenGallery }) {
 
       {/* Floating Bottom Glassmorphism Dock */}
       <footer className="relative z-20 flex items-center justify-center pb-2 sm:pb-3">
-        <div className="flex items-center gap-3 sm:gap-4 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-zinc-950/95 md:bg-zinc-950/65 border-t border-white/25 border-x border-white/10 border-b border-black/80 shadow-[0_25px_60px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.2)] shadow-emerald-500/10 md:backdrop-blur-3xl">
+        <div className="flex items-center gap-3 sm:gap-4 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-zinc-900/80 backdrop-blur-xl border border-white/5 shadow-2xl">
           
           {/* Left Controls: Mic, Cam, Crop Guide */}
           <div className="flex items-center gap-1.5">

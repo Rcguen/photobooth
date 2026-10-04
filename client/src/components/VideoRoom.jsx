@@ -501,7 +501,7 @@ export default function VideoRoom({ onOpenGallery }) {
       </AnimatePresence>
 
       {/* Floating Bottom Glassmorphism Dock */}
-      <footer className="relative z-20 flex items-center justify-center pb-2 sm:pb-3">
+      <footer className="relative z-20 flex items-center justify-center pb-8 sm:pb-4">
         <div className="flex items-center gap-3 sm:gap-4 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-zinc-900/80 backdrop-blur-xl border border-white/5 shadow-2xl">
           
           {/* Left Controls: Mic, Cam, Crop Guide */}

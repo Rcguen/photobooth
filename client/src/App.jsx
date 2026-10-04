@@ -148,7 +148,7 @@ function MainAppRoutes() {
   };
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-[#040605] via-[#070d0a] to-[#030504] text-zinc-100 flex flex-col font-sans select-none overflow-hidden">
+    <div className="relative min-h-[100dvh] bg-gradient-to-br from-[#040605] via-[#070d0a] to-[#030504] text-zinc-100 flex flex-col font-sans select-none overflow-hidden">
       {/* Subtle grid pattern background */}
       <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.035)_1px,transparent_1px)] [background-size:28px_28px] pointer-events-none z-0" />
 

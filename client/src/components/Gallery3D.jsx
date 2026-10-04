@@ -286,7 +286,7 @@ export default function Gallery3D({ strips = [], onBackToBooth, isActive = true 
 
       {/* Bottom Hint Banner */}
       {hasStrips && (
-        <footer className="relative z-20 p-3 text-center text-xs text-zinc-400 bg-zinc-950/95 md:bg-zinc-950/80 border-t border-white/10 md:backdrop-blur-2xl flex items-center justify-center gap-2">
+        <footer className="relative z-20 pt-3 pb-8 px-3 sm:pb-3 text-center text-xs text-zinc-400 bg-zinc-950/95 md:bg-zinc-950/80 border-t border-white/10 md:backdrop-blur-2xl flex items-center justify-center gap-2">
           <RotateCcw className="w-3.5 h-3.5 text-emerald-400 animate-spin" style={{ animationDuration: '6s' }} />
           <span>Click & drag the strip to rotate and inspect in 3D • Synced with Cloudinary & Firestore</span>
         </footer>

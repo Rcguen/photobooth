@@ -83,7 +83,7 @@ export default function PhotoModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.94, y: 15 }}
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        className="relative max-w-lg w-full bg-zinc-900/90 border border-white/5 rounded-3xl overflow-hidden shadow-2xl flex flex-col h-[92vh] max-h-[92vh] backdrop-blur-xl"
+        className="relative max-w-lg w-full bg-zinc-900/90 border border-white/5 rounded-3xl overflow-hidden shadow-2xl flex flex-col h-[92dvh] max-h-[92dvh] backdrop-blur-xl"
       >
         {/* Modal Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.08] bg-zinc-950/50 z-30 flex-shrink-0">
@@ -184,7 +184,7 @@ export default function PhotoModal({
         </div>
 
         {/* Actions Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-t border-white/[0.05] bg-zinc-950/80 z-30 flex-shrink-0">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-3 pb-6 sm:pb-3 border-t border-white/[0.05] bg-zinc-950/80 z-30 flex-shrink-0">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}

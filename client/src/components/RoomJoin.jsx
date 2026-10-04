@@ -76,12 +76,7 @@ export default function RoomJoin({ onJoin }) {
       // Explicitly configure browserLocalPersistence to prevent storage partitioning loss on mobile
       await setPersistence(auth, browserLocalPersistence);
 
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      if (isMobile) {
-        await signInWithRedirect(auth, googleProvider);
-      } else {
-        await signInWithPopup(auth, googleProvider);
-      }
+      await signInWithPopup(auth, googleProvider);
     } catch (err) {
       console.error('Google Sign-in Error:', err);
       if (err.code === 'auth/popup-blocked') {

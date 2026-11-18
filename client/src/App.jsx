@@ -5,8 +5,29 @@ import RoomJoin from './components/RoomJoin';
 import VideoRoom from './components/VideoRoom';
 import MovieRoom from './components/MovieRoom';
 import Gallery3D from './components/Gallery3D';
-import { Camera, Tv, Box, LogOut, Heart } from 'lucide-react';
+import { ArrowLeft, Camera, Tv, Box, LogOut, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
+
+function BackToJarButton({ compact = false }) {
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      window.history.back();
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleBack}
+      className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-white/10 bg-black/25 px-3 text-xs font-medium text-zinc-300 shadow-lg backdrop-blur-md transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70 ${compact ? 'px-2.5' : ''}`}
+      aria-label="Back to The Memory Jar"
+      title="Back to The Memory Jar"
+    >
+      <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+      {!compact && <span>Back to Jar</span>}
+    </button>
+  );
+}
 
 function NavigationHeader() {
   const { roomId, localName, partnerName, isConnected, savedStrips, leaveRoom } = useWebRTC();
@@ -21,6 +42,7 @@ function NavigationHeader() {
     <header className="sticky top-0 z-40 w-full mx-auto px-4 py-3 flex items-center justify-between gap-4 select-none bg-zinc-950/80 backdrop-blur-xl border-b border-white/5">
       {/* Left Brand / Room Info */}
       <div className="flex items-center gap-3">
+        <BackToJarButton compact />
         <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
           <Heart className="w-4 h-4 fill-emerald-400/50" />
         </div>
@@ -163,6 +185,7 @@ function MainAppRoutes() {
 
       {/* Header */}
       {roomId && <NavigationHeader />}
+      {!roomId && <div className="absolute left-4 top-4 z-50"><BackToJarButton /></div>}
 
       {/* Main View Stage: Stacked DOM Persistence */}
       <div className="relative z-10 flex-1 flex flex-col overflow-hidden">
